@@ -154,6 +154,9 @@ public:
 	/// FIXME: this really should be elsewhere...
 	virtual QString instanceConfigFolder() const = 0;
 
+	void setDefaultAccount(const QString &username);
+	QString defaultAccount() const;
+
 	enum InstanceFlag
 	{
 		VersionBrokenFlag = 0x01,
