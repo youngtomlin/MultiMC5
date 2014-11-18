@@ -668,8 +668,6 @@ SET(MULTIMC_SOURCES
 	logic/quickmod/QuickModRef.h
 	logic/quickmod/QuickModBuilder.cpp
 	logic/quickmod/QuickModBuilder.h
-	logic/quickmod/QuickModDependencyResolver.cpp
-	logic/quickmod/QuickModDependencyResolver.h
 	logic/quickmod/QuickModDownload.cpp
 	logic/quickmod/QuickModDownload.h
 	logic/quickmod/QuickModVersion.cpp

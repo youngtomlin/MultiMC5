@@ -127,7 +127,4 @@ private: /* data */
 
 	QString m_dbFile;
 	QString m_configFile;
-	
-	// FIXME: get rid of this.
-	std::shared_ptr<SettingsObject> m_settings;
 };

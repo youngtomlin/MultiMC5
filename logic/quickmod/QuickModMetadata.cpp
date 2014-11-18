@@ -313,7 +313,8 @@ void QuickModMetadata::fetchImages()
 	if (download)
 	{
 		job->start();
-		//FIXME: job is leaked here.
+		connect(job, &NetJob::succeeded, job, &NetJob::deleteLater);
+		connect(job, &NetJob::failed, job, &NetJob::deleteLater);
 	}
 	else
 	{
