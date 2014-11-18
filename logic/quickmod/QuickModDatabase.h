@@ -10,14 +10,14 @@ class MultiMC;
 class QuickModModel;
 class QTimer;
 class QuickModMetadata;
-class QuickModVersion;
+class BaseQuickModVersion;
 class OneSixInstance;
 class QuickModDownloadAction;
 class QuickModBaseDownloadAction;
 class QuickModIndexModel;
 
 typedef std::shared_ptr<QuickModMetadata> QuickModMetadataPtr;
-typedef std::shared_ptr<QuickModVersion> QuickModVersionPtr;
+typedef std::shared_ptr<BaseQuickModVersion> QuickModVersionPtr;
 
 class QuickModDatabase : public QObject
 {

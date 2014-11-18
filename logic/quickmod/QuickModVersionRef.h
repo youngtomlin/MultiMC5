@@ -1,8 +1,8 @@
 #pragma once
 #include "QuickModMetadata.h"
 #include <modutils.h>
-class QuickModVersion;
-typedef std::shared_ptr<QuickModVersion> QuickModVersionPtr;
+class BaseQuickModVersion;
+typedef std::shared_ptr<BaseQuickModVersion> QuickModVersionPtr;
 class QuickModVersionRef
 {
 	QuickModRef m_mod;

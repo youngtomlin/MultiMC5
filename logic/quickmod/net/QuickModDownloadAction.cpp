@@ -36,14 +36,7 @@ bool QuickModDownloadAction::handle(const QByteArray &data)
 		}
 		m_resultMetadata = std::make_shared<QuickModMetadata>();
 		m_resultMetadata->parse(root);
-
-		const QJsonArray versions = MMCJson::ensureArray(root.value("versions"));
-		for (const auto versionVal : versions)
-		{
-			QuickModVersionPtr ptr = std::make_shared<QuickModVersion>(m_resultMetadata);
-			ptr->parse(MMCJson::ensureObject(versionVal));
-			m_resultVersions.append(ptr);
-		}
+		m_resultVersions.append(BaseQuickModVersion::parse(root, m_resultMetadata));
 
 		if (m_autoAdd)
 		{

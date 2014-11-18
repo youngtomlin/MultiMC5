@@ -107,6 +107,7 @@ public:
 	{
 		m_mcVersion = version;
 		invalidateFilter();
+		qDebug() << m_mcVersion;
 	}
 	void setFulltext(const QString &query)
 	{
@@ -143,9 +144,12 @@ protected:
 		if (!m_mcVersion.isEmpty())
 		{
 			auto acceptedVersions = index.data(QuickModModel::MCVersionsRole).toStringList();
-			if (!listContainsSubstring(acceptedVersions, m_mcVersion))
+			for (auto version : acceptedVersions)
 			{
-				return false;
+				if (!Util::versionIsInInterval(Util::Version(m_mcVersion), version))
+				{
+					return false;
+				}
 			}
 		}
 		if (!m_fulltext.isEmpty())
@@ -318,8 +322,8 @@ void QuickModBrowsePage::checkStateChanged(const QModelIndex &index, const bool 
 
 			if (!dialog.exec())
 				return;
-			std::shared_ptr<QuickModVersion> version =
-				std::dynamic_pointer_cast<QuickModVersion>(dialog.selectedVersion());
+			std::shared_ptr<BaseQuickModVersion> version =
+				std::dynamic_pointer_cast<BaseQuickModVersion>(dialog.selectedVersion());
 			if (!version)
 				return;
 			auto transaction = m_instance->installedPackages()->getTransaction();

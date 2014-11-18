@@ -21,7 +21,7 @@
 class QuickModRef;
 class OneSixInstance;
 class Bindable;
-typedef std::shared_ptr<class QuickModVersion> QuickModVersionPtr;
+typedef std::shared_ptr<class BaseQuickModVersion> QuickModVersionPtr;
 typedef std::shared_ptr<struct ForgeVersion> ForgeVersionPtr;
 typedef std::shared_ptr<struct LiteLoaderVersion> LiteLoaderVersionPtr;
 

@@ -18,9 +18,23 @@
 #include "logic/quickmod/QuickModDatabase.h"
 #include "MultiMC.h"
 
-QuickModVersionBuilder::QuickModVersionBuilder(QuickModBuilder builder)
-	: m_version(std::make_shared<QuickModVersion>(builder.m_mod)), m_builder(builder)
+QuickModVersionBuilder::QuickModVersionBuilder(QuickModBuilder builder, const BaseQuickModVersion::InstallType &type)
+	: m_builder(builder)
 {
+	switch (type)
+	{
+	case BaseQuickModVersion::ForgeMod:
+	case BaseQuickModVersion::ForgeCoreMod:
+		m_version = std::make_shared<QuickModForgeModVersion>(builder.m_mod, type);
+	case BaseQuickModVersion::LiteLoaderMod:
+		m_version = std::make_shared<QuickModLiteloaderVersion>(builder.m_mod);
+	case BaseQuickModVersion::Extract:
+		m_version = std::make_shared<QuickModExtractVersion>(builder.m_mod);
+	case BaseQuickModVersion::ConfigPack:
+		m_version = std::make_shared<QuickModConfigPackVersion>(builder.m_mod);
+	case BaseQuickModVersion::Group:
+		m_version = std::make_shared<QuickModGroupVersion>(builder.m_mod);
+	}
 }
 QuickModBuilder QuickModVersionBuilder::build()
 {
@@ -32,19 +46,17 @@ QuickModBuilder::QuickModBuilder() : m_mod(std::make_shared<QuickModMetadata>())
 {
 }
 
-QuickModVersionBuilder QuickModBuilder::addVersion()
+QuickModVersionBuilder QuickModBuilder::addVersion(const BaseQuickModVersion::InstallType &type)
 {
-	return QuickModVersionBuilder(*this);
+	return QuickModVersionBuilder(*this, type);
 }
 
 QuickModBuilder QuickModBuilder::addVersion(const QuickModVersionPtr ptr)
 {
-	auto builder = addVersion()
+	auto builder = addVersion(ptr->installType)
 					   .setName(ptr->name())
 					   .setType(ptr->type)
-					   .setInstallType(ptr->installType)
-					   .setSha1(ptr->sha1)
-					   .setCompatibleMCVersions(ptr->mcVersions);
+					   .setSha1(ptr->sha1);
 	builder.m_version->dependencies = ptr->dependencies;
 	builder.m_version->recommendations = ptr->recommendations;
 	builder.m_version->suggestions = ptr->suggestions;

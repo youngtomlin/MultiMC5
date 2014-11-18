@@ -106,7 +106,7 @@ void PackagesPage::on_changeVersion_clicked()
 
 	if (!dialog.exec())
 		return;
-	std::shared_ptr<QuickModVersion> version = std::dynamic_pointer_cast<QuickModVersion>(dialog.selectedVersion());
+	std::shared_ptr<BaseQuickModVersion> version = std::dynamic_pointer_cast<BaseQuickModVersion>(dialog.selectedVersion());
 	if(!version)
 		return;
 	

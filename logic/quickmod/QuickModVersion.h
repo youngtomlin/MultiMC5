@@ -37,11 +37,11 @@ class OneSixInstance;
 class BaseInstance;
 typedef std::shared_ptr<BaseInstance> InstancePtr;
 
-class QuickModVersion;
-typedef std::shared_ptr<QuickModVersion> QuickModVersionPtr;
+class BaseQuickModVersion;
+typedef std::shared_ptr<BaseQuickModVersion> QuickModVersionPtr;
 Q_DECLARE_METATYPE(QuickModVersionPtr)
 
-class QuickModVersion : public BaseVersion
+class BaseQuickModVersion : public BaseVersion
 {
 public: /* types */
 	enum InstallType
@@ -68,11 +68,12 @@ public: /* types */
 	};
 
 public: /* construction */
-	QuickModVersion(QuickModMetadataPtr mod, bool valid = true) : mod(mod)
+	BaseQuickModVersion(QuickModMetadataPtr mod, InstallType installType) : mod(mod), installType(installType)
 	{
 	}
 
 	static QList<QuickModVersionPtr> parse(const QJsonObject &object, QuickModMetadataPtr mod);
+	static QuickModVersionPtr parseSingle(const QJsonObject &object, QuickModMetadataPtr mod);
 	void parse(const QJsonObject &object);
 	QJsonObject toJson() const;
 
@@ -99,21 +100,21 @@ public: /* methods */
 
 	/// get the file name for the mod file.
 	QString fileName() const;
-
 	
 	MetaEntryPtr cacheEntry() const;
 
 	/// get the local cache storage path for the mod
 	QString storagePath() const;
 
+	// FIXME: make this part of the json.
 	/// get the instance deploy path for the mod
-	QString instancePath() const;
+	virtual QString instancePath() const = 0;
 
 	/// Get a download to use.
 	QuickModDownload highestPriorityDownload(const QuickModDownload::DownloadType type = QuickModDownload::Invalid);
 
 	/// Does this actually need to be deployed into the instance?
-	bool needsDeploy() const;
+	virtual bool needsDeploy() const { return true; }
 
 	/// install this version of package into the specified instance
 	void installInto(std::shared_ptr<OneSixInstance> instance);
@@ -121,8 +122,26 @@ public: /* methods */
 	/// removes this version of package from the specified instance
 	void removeFrom(std::shared_ptr<OneSixInstance> instance);
 
+	bool dependsOnMinecraft() const
+	{
+		return dependencies.contains(QuickModRef("net.minecraft"));
+	}
+	QString minecraftVersionInterval() const
+	{
+		if (!dependsOnMinecraft())
+		{
+			return QString();
+		}
+		else
+		{
+			return dependencies[QuickModRef("net.minecraft")].first.toString();
+		}
+	}
+
 private: /* methods */
 	void installLibrariesInto(std::shared_ptr<OneSixInstance> instance);
+	virtual QString fileEnding() const = 0;
+	virtual void installIntoImpl(const QString &source, const QString &destination) = 0;
 
 public: /* data */
 	/// quickmod this is associated with
@@ -139,9 +158,6 @@ public: /* data */
 
 	/// A type of the version, for example Release, Dev, Alpha or Beta.
 	QString type;
-
-	// FIXME: versions of minecraft? how does that work now? TODO!
-	QStringList mcVersions;
 
 	QMap<QuickModRef, QPair<QuickModVersionRef, bool>> dependencies;
 	QMap<QuickModRef, QuickModVersionRef> recommendations;
@@ -161,4 +177,55 @@ public: /* data */
 
 	/// list of download locations for the file.
 	QList<QuickModDownload> downloads;
+};
+
+
+class QuickModForgeModVersion : public BaseQuickModVersion
+{
+public:
+	explicit QuickModForgeModVersion(QuickModMetadataPtr mod, InstallType installType = ForgeMod)
+		: BaseQuickModVersion(mod, installType) {}
+
+	QString fileEnding() const override { return ".jar"; }
+	QString instancePath() const override { return "mods"; }
+	void installIntoImpl(const QString &source, const QString &destination) override;
+};
+class QuickModLiteloaderVersion : public QuickModForgeModVersion
+{
+public:
+	explicit QuickModLiteloaderVersion(QuickModMetadataPtr mod)
+		: QuickModForgeModVersion(mod, LiteLoaderMod) {}
+
+	QString fileEnding() const override { return ".litemod"; }
+};
+
+class QuickModExtractVersion : public BaseQuickModVersion
+{
+public:
+	explicit QuickModExtractVersion(QuickModMetadataPtr mod, InstallType installType = Extract)
+		: BaseQuickModVersion(mod, installType) {}
+
+	QString fileEnding() const override { return ".zip"; }
+	QString instancePath() const override { return "."; }
+	void installIntoImpl(const QString &source, const QString &destination) override;
+};
+class QuickModConfigPackVersion : public QuickModExtractVersion
+{
+public:
+	explicit QuickModConfigPackVersion(QuickModMetadataPtr mod)
+		: QuickModExtractVersion(mod, ConfigPack) {}
+
+	QString instancePath() const override { return "config"; }
+};
+
+class QuickModGroupVersion : public BaseQuickModVersion
+{
+public:
+	explicit QuickModGroupVersion(QuickModMetadataPtr mod)
+		: BaseQuickModVersion(mod, Group) {}
+
+	QString fileEnding() const override { return QString(); }
+	QString instancePath() const override { return QString(); }
+	bool needsDeploy() const override { return false; }
+	void installIntoImpl(const QString &source, const QString &destination) override { /* nop */ }
 };

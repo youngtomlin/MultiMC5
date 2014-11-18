@@ -26,9 +26,9 @@
 class QWidget;
 
 class OneSixInstance;
-class QuickModVersion;
+class BaseQuickModVersion;
 class QuickModMetadata;
-typedef std::shared_ptr<QuickModVersion> QuickModVersionPtr;
+typedef std::shared_ptr<BaseQuickModVersion> QuickModVersionPtr;
 
 class QuickModDependencyResolver : public QObject, public Bindable
 {

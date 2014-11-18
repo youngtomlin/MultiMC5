@@ -146,7 +146,10 @@ QStringList QuickModDatabase::minecraftVersions(const QuickModRef &uid) const
 	QSet<QString> out;
 	for (const auto version : m_versions[uid])
 	{
-		out.unite(version->mcVersions.toSet());
+		if (version->dependsOnMinecraft())
+		{
+			out.insert(version->minecraftVersionInterval());
+		}
 	}
 	return out.toList();
 }
@@ -157,7 +160,9 @@ QList<QuickModVersionRef> QuickModDatabase::versions(const QuickModRef &uid,
 	QSet<QuickModVersionRef> out;
 	for (const auto v : m_versions[uid])
 	{
-		if (v->mcVersions.contains(mcVersion))
+		if (v->dependsOnMinecraft() &&
+			Util::versionIsInInterval(Util::Version(mcVersion),
+									  v->minecraftVersionInterval()))
 		{
 			out.insert(v->version());
 		}
@@ -367,10 +372,10 @@ void QuickModDatabase::loadFromDisk()
 					 ++versionIt)
 				{
 					// FIXME: giving it a fake 'metadata', because otherwise this causes crashes
-					QuickModVersionPtr ptr = std::make_shared<QuickModVersion>(
-						*(m_metadata[QuickModRef(uid)].begin()));
-					ptr->parse(MMCJson::ensureObject(versionIt.value()));
-					m_versions[QuickModRef(uid)][versionIt.key()] = ptr;
+					m_versions[QuickModRef(uid)][versionIt.key()] =
+						BaseQuickModVersion::parseSingle(
+							MMCJson::ensureObject(versionIt.value()),
+							*(m_metadata[QuickModRef(uid)].begin()));
 				}
 			}
 		}

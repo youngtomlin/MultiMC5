@@ -73,7 +73,7 @@ private slots:
 
 	QuickModVersionPtr createTestingVersion(QuickModMetadataPtr mod)
 	{
-		auto version = new QuickModVersion(mod);
+		auto version = std::make_shared<QuickModForgeModVersion>(mod);
 		version->versionName = "1.42";
 		version->versionString = "1.42";
 		version->m_version = Util::Version("1.42");
@@ -81,8 +81,6 @@ private slots:
 		download.url = "http://downloads.com/deadbeaf";
 		version->downloads.append(download);
 		// version->forgeVersionFilter = "(9.8.42,)";
-		version->mcVersions << "1.6.2"
-							<< "1.6.4";
 		version->dependencies = {
 			{QuickModRef("stuff"),
 			 qMakePair(QuickModVersionRef(QuickModRef("stuff"), Util::Version("1.0.0.0.0")),
@@ -91,7 +89,7 @@ private slots:
 			{QuickModRef("OtherName"),
 			 QuickModVersionRef(QuickModRef("OtherName"), Util::Version("1.2.3"))}};
 		version->sha1 = "a68b86df2f3fff44";
-		return QuickModVersionPtr(version);
+		return version;
 	}
 	/*
 		void testMarkAsExisting_data()

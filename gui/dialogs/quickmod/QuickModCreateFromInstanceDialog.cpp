@@ -243,7 +243,6 @@ bool QuickModCreateFromInstanceDialog::hasVersion(const QString &name) const
 void QuickModCreateFromInstanceDialog::createVersion(QuickModVersionBuilder builder) const
 {
 	// Set basic information
-	builder.setInstallType(QuickModVersion::Group);
 	builder.setName(ui->versionEdit->text());
 	if (!ui->versionTypeEdit->text().isEmpty())
 	{
@@ -607,7 +606,7 @@ QByteArray QuickModCreateFromInstanceDialog::toJson() const
 					   ui->urlsTable->item(i, 1)->text());
 	}
 
-	createVersion(builder.addVersion());
+	createVersion(builder.addVersion(BaseQuickModVersion::Group));
 
 	for (const auto version : m_otherVersions)
 	{
@@ -628,7 +627,7 @@ void QuickModCreateFromInstanceDialog::fromJson(const QByteArray &json)
 	auto root = MMCJson::ensureObject(MMCJson::parseDocument(json, "QuickMod"));
 	QuickModMetadataPtr mod = std::make_shared<QuickModMetadata>();
 	mod->parse(root);
-	m_otherVersions = QuickModVersion::parse(root, mod);
+	m_otherVersions = BaseQuickModVersion::parse(root, mod);
 	ui->uidEdit->setText(mod->uid().toString());
 	ui->repoEdit->setText(mod->repo());
 	ui->nameEdit->setText(mod->name());

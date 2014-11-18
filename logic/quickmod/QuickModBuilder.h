@@ -97,7 +97,7 @@ public:
 		return *this;
 	}
 
-	QuickModVersionBuilder addVersion();
+	QuickModVersionBuilder addVersion(const BaseQuickModVersion::InstallType &type);
 	QuickModBuilder addVersion(const QuickModVersionPtr ptr);
 
 	QJsonObject build() const;
@@ -127,16 +127,6 @@ public:
 	QuickModVersionBuilder setType(const QString &type)
 	{
 		m_version->type = type;
-		return *this;
-	}
-	QuickModVersionBuilder setCompatibleMCVersions(const QStringList &versions)
-	{
-		m_version->mcVersions = versions;
-		return *this;
-	}
-	QuickModVersionBuilder setInstallType(const QuickModVersion::InstallType &type)
-	{
-		m_version->installType = type;
 		return *this;
 	}
 	QuickModVersionBuilder setSha1(const QString &sha1)
@@ -173,7 +163,7 @@ public:
 
 	QuickModVersionBuilder addLibrary(const QString &name, const QUrl &url)
 	{
-		m_version->libraries.append(QuickModVersion::Library(name, url));
+		m_version->libraries.append(BaseQuickModVersion::Library(name, url));
 		return *this;
 	}
 	QuickModVersionBuilder addDownload(const QUrl &url,
@@ -195,7 +185,7 @@ public:
 
 private:
 	friend class QuickModBuilder;
-	QuickModVersionBuilder(QuickModBuilder builder);
+	QuickModVersionBuilder(QuickModBuilder builder, const BaseQuickModVersion::InstallType &type);
 	QuickModVersionPtr m_version;
 	QuickModBuilder m_builder;
 };

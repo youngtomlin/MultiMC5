@@ -23,8 +23,8 @@ namespace Ui
 class QuickModDownloadSelectionDialog;
 }
 
-class QuickModVersion;
-typedef std::shared_ptr<QuickModVersion> QuickModVersionPtr;
+class BaseQuickModVersion;
+typedef std::shared_ptr<BaseQuickModVersion> QuickModVersionPtr;
 class QuickModDownload;
 
 class QuickModDownloadSelectionDialog : public QDialog

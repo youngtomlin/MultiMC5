@@ -3,10 +3,10 @@
 #include "logic/quickmod/net/QuickModBaseDownloadAction.h"
 
 class QuickModMetadata;
-class QuickModVersion;
+class BaseQuickModVersion;
 
 typedef std::shared_ptr<QuickModMetadata> QuickModMetadataPtr;
-typedef std::shared_ptr<QuickModVersion> QuickModVersionPtr;
+typedef std::shared_ptr<BaseQuickModVersion> QuickModVersionPtr;
 
 class QuickModDownloadAction : public QuickModBaseDownloadAction
 {

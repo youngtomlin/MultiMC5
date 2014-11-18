@@ -30,43 +30,12 @@
 #include "logic/BaseInstance.h"
 
 //BEGIN mod file logic
-// FIXME: see the pattern. This CALLS for splitting into more classes, or abstracting away
-// into data.
-QString QuickModVersion::fileName() const
+QString BaseQuickModVersion::fileName() const
 {
-	QString ending;
-	switch (installType)
-	{
-	case QuickModVersion::ForgeMod:
-	case QuickModVersion::ForgeCoreMod:
-	{
-		ending = ".jar";
-		break;
-	}
-
-	case QuickModVersion::LiteLoaderMod:
-	{
-		ending = ".litemod";
-		break;
-	}
-
-	case QuickModVersion::Extract:
-	case QuickModVersion::ConfigPack:
-	{
-		ending = ".zip";
-		break;
-	}
-
-	case QuickModVersion::Group:
-	default:
-	{
-		return QString();
-	}
-	}
-	return mod->internalUid() + "-" + name() + ending;
+	return mod->internalUid() + "-" + name() + fileEnding();
 }
 
-MetaEntryPtr QuickModVersion::cacheEntry() const
+MetaEntryPtr BaseQuickModVersion::cacheEntry() const
 {
 	if(!fileName().isNull())
 	{
@@ -75,12 +44,7 @@ MetaEntryPtr QuickModVersion::cacheEntry() const
 	return nullptr;
 }
 
-bool QuickModVersion::needsDeploy() const
-{
-	return !instancePath().isNull();
-}
-
-QString QuickModVersion::storagePath() const
+QString BaseQuickModVersion::storagePath() const
 {
 	auto entry = cacheEntry();
 	if(!entry)
@@ -90,37 +54,16 @@ QString QuickModVersion::storagePath() const
 	return entry->getFullPath();
 }
 
-// FIXME: make this part of the json.
-QString QuickModVersion::instancePath() const
+void BaseQuickModVersion::installInto(std::shared_ptr<OneSixInstance> instance)
 {
-	switch (installType)
-	{
-	case QuickModVersion::ForgeMod:
-	case QuickModVersion::ForgeCoreMod:
-	case QuickModVersion::LiteLoaderMod:
-		return "mods";
-	case QuickModVersion::Extract:
-		return ".";
-	case QuickModVersion::ConfigPack:
-		return "config";
-	case QuickModVersion::Group:
-	default:
-		return QString();
-	}
-}
-
-void QuickModVersion::installInto(std::shared_ptr<OneSixInstance> instance)
-{
-	QString source = storagePath();
-	QString destination = instancePath();
+	const QString source = storagePath();
+	const QString destination = PathCombine(instance->minecraftRoot(), instancePath());
 
 	// with nothing to install, we are finished.
 	if(destination.isNull())
 	{
 		return;
 	}
-	
-	destination = PathCombine(instance->minecraftRoot(), destination);
 
 	// make sure the destination folder exists
 	if(!ensureFolderPathExists(destination))
@@ -128,39 +71,7 @@ void QuickModVersion::installInto(std::shared_ptr<OneSixInstance> instance)
 		throw MMCError(QObject::tr("Unable to create mod destination folder %1").arg(destination));
 	}
 
-	if (installType == QuickModVersion::Extract ||
-		installType == QuickModVersion::ConfigPack)
-	{
-		QLOG_INFO() << "Extracting" << source << "to" << destination;
-		QFileInfo finfo(source);
-		const QMimeType mimeType = QMimeDatabase().mimeTypeForFile(finfo);
-		if (mimeType.inherits("application/zip"))
-		{
-			JlCompress::extractDir(finfo.absoluteFilePath(), destination);
-		}
-		else
-		{
-			throw MMCError(QObject::tr("Error: Trying to extract an unknown file type %1")
-								   .arg(finfo.completeSuffix()));
-		}
-	}
-	else
-	{
-		const QString dest = PathCombine(destination, QFileInfo(source).fileName());
-		if (QFile::exists(dest))
-		{
-			if (!QFile::remove(dest))
-			{
-				throw MMCError(QObject::tr("Error: Deploying %1 to %2").arg(source, dest));
-			}
-		}
-		if (!QFile::copy(source, dest))
-		{
-			throw MMCError(QObject::tr("Error: Deploying %1 to %2").arg(source, dest));
-		}
-		//FIXME: replace.
-		// markModAsInstalled(version, dest);
-	}
+	installIntoImpl(source, destination);
 
 	// do some things to libraries.
 	if (!libraries.isEmpty())
@@ -169,13 +80,13 @@ void QuickModVersion::installInto(std::shared_ptr<OneSixInstance> instance)
 	}
 }
 
-void QuickModVersion::removeFrom(std::shared_ptr<OneSixInstance> instance)
+void BaseQuickModVersion::removeFrom(std::shared_ptr<OneSixInstance> instance)
 {
 	// TODO removal of quickmods
 }
 
 //FIXME: this is crap. Use the actual version objects!
-void QuickModVersion::installLibrariesInto(std::shared_ptr<OneSixInstance> instance)
+void BaseQuickModVersion::installLibrariesInto(std::shared_ptr<OneSixInstance> instance)
 {
 	QJsonObject obj;
 	obj.insert("order", qMin(instance->getFullVersion()->getHighestOrder(), 99) + 1);
@@ -213,7 +124,7 @@ void QuickModVersion::installLibrariesInto(std::shared_ptr<OneSixInstance> insta
 	instance->reloadVersion();
 }
 
-QuickModDownload QuickModVersion::highestPriorityDownload(const QuickModDownload::DownloadType type)
+QuickModDownload BaseQuickModVersion::highestPriorityDownload(const QuickModDownload::DownloadType type)
 {
 	if (downloads.isEmpty())
 	{
@@ -225,19 +136,56 @@ QuickModDownload QuickModVersion::highestPriorityDownload(const QuickModDownload
 
 
 //BEGIN de/serialization
-QList<QuickModVersionPtr> QuickModVersion::parse(const QJsonObject &object, QuickModMetadataPtr mod)
+QList<QuickModVersionPtr> BaseQuickModVersion::parse(const QJsonObject &object, QuickModMetadataPtr mod)
 {
 	QList<QuickModVersionPtr> out;
 	for (auto versionVal : MMCJson::ensureObject(object.value("versions")))
 	{
-		QuickModVersionPtr ptr = std::make_shared<QuickModVersion>(mod);
-		ptr->parse(MMCJson::ensureObject(versionVal));
-		out.append(ptr);
+		out.append(parseSingle(MMCJson::ensureObject(versionVal), mod));
 	}
 	return out;
 }
 
-void QuickModVersion::parse(const QJsonObject &object)
+QuickModVersionPtr BaseQuickModVersion::parseSingle(const QJsonObject &object, QuickModMetadataPtr mod)
+{
+	QuickModVersionPtr ptr;
+	// install type
+	{
+		const QString typeString = object.value("installType").toString("forgeMod");
+		if (typeString == "forgeMod")
+		{
+			ptr = std::make_shared<QuickModForgeModVersion>(mod);
+		}
+		else if (typeString == "forgeCoreMod")
+		{
+			ptr = std::make_shared<QuickModForgeModVersion>(mod, ForgeCoreMod);
+		}
+		else if (typeString == "liteloaderMod")
+		{
+			ptr = std::make_shared<QuickModLiteloaderVersion>(mod);
+		}
+		else if (typeString == "extract")
+		{
+			ptr = std::make_shared<QuickModExtractVersion>(mod);
+		}
+		else if (typeString == "configPack")
+		{
+			ptr = std::make_shared<QuickModConfigPackVersion>(mod);
+		}
+		else if (typeString == "group")
+		{
+			ptr = std::make_shared<QuickModGroupVersion>(mod);
+		}
+		else
+		{
+			throw MMCError(QObject::tr("Unknown value for \"installType\" field"));
+		}
+	}
+	ptr->parse(object);
+	return ptr;
+}
+
+void BaseQuickModVersion::parse(const QJsonObject &object)
 {
 	if(object.contains("name") && object.contains("version"))
 	{
@@ -263,11 +211,6 @@ void QuickModVersion::parse(const QJsonObject &object)
 
 	m_version = Util::Version(versionString);
 	sha1 = object.value(QStringLiteral("sha1")).toString();
-	mcVersions.clear();
-	for (auto val : MMCJson::ensureArray(object.value("mcCompat"), "mcCompat"))
-	{
-		mcVersions.append(MMCJson::ensureString(val));
-	}
 	dependencies.clear();
 	recommendations.clear();
 	suggestions.clear();
@@ -371,42 +314,9 @@ void QuickModVersion::parse(const QJsonObject &object)
 	std::stable_sort(downloads.begin(), downloads.end(),
 			  [](const QuickModDownload dl1, const QuickModDownload dl2)
 	{ return dl1.priority < dl2.priority; });
-
-	// install type
-	{
-		const QString typeString = object.value("installType").toString("forgeMod");
-		if (typeString == "forgeMod")
-		{
-			installType = ForgeMod;
-		}
-		else if (typeString == "forgeCoreMod")
-		{
-			installType = ForgeCoreMod;
-		}
-		else if (typeString == "liteloaderMod")
-		{
-			installType = LiteLoaderMod;
-		}
-		else if (typeString == "extract")
-		{
-			installType = Extract;
-		}
-		else if (typeString == "configPack")
-		{
-			installType = ConfigPack;
-		}
-		else if (typeString == "group")
-		{
-			installType = Group;
-		}
-		else
-		{
-			throw MMCError(QObject::tr("Unknown value for \"installType\" field"));
-		}
-	}
 }
 
-QJsonObject QuickModVersion::toJson() const
+QJsonObject BaseQuickModVersion::toJson() const
 {
 	QJsonArray refs;
 	auto refToJson = [&refs](const QString & type,
@@ -424,7 +334,6 @@ QJsonObject QuickModVersion::toJson() const
 
 	QJsonObject obj;
 	obj.insert("name", versionName);
-	obj.insert("mcCompat", QJsonArray::fromStringList(mcVersions));
 	MMCJson::writeString(obj, "version", versionString);
 	MMCJson::writeString(obj, "type", type);
 	MMCJson::writeString(obj, "sha1", sha1);
@@ -468,7 +377,7 @@ QJsonObject QuickModVersion::toJson() const
 	return obj;
 }
 
-QJsonObject QuickModVersion::Library::toJson() const
+QJsonObject BaseQuickModVersion::Library::toJson() const
 {
 	QJsonObject obj;
 	obj.insert("name", name);
@@ -479,3 +388,37 @@ QJsonObject QuickModVersion::Library::toJson() const
 	return obj;
 }
 //END
+
+
+void QuickModForgeModVersion::installIntoImpl(const QString &source, const QString &destination)
+{
+	const QString dest = PathCombine(destination, QFileInfo(source).fileName());
+	if (QFile::exists(dest))
+	{
+		if (!QFile::remove(dest))
+		{
+			throw MMCError(QObject::tr("Error: Deploying %1 to %2").arg(source, dest));
+		}
+	}
+	if (!QFile::copy(source, dest))
+	{
+		throw MMCError(QObject::tr("Error: Deploying %1 to %2").arg(source, dest));
+	}
+	//FIXME: replace.
+	// markModAsInstalled(version, dest);
+}
+void QuickModExtractVersion::installIntoImpl(const QString &source, const QString &destination)
+{
+	QLOG_INFO() << "Extracting" << source << "to" << destination;
+	QFileInfo finfo(source);
+	const QMimeType mimeType = QMimeDatabase().mimeTypeForFile(finfo);
+	if (mimeType.inherits("application/zip"))
+	{
+		JlCompress::extractDir(finfo.absoluteFilePath(), destination);
+	}
+	else
+	{
+		throw MMCError(QObject::tr("Error: Trying to extract an unknown file type %1")
+							   .arg(finfo.completeSuffix()));
+	}
+}
