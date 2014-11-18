@@ -2,8 +2,6 @@
 
 #include "QuickModBaseDownloadAction.h"
 
-class QuickModIndexModel;
-
 typedef std::shared_ptr<class NetJob> NetJobPtr;
 
 class QuickModIndexDownloadAction : public QuickModBaseDownloadAction
@@ -19,6 +17,4 @@ public:
 
 private:
 	bool handle(const QByteArray &data);
-
-	static QuickModIndexModel *m_indexList;
 };

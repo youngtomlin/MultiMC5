@@ -9,15 +9,9 @@
 #include "logic/MMCJson.h"
 #include "logic/net/NetJob.h"
 
-QuickModIndexModel *QuickModIndexDownloadAction::m_indexList = nullptr;
-
 QuickModIndexDownloadAction::QuickModIndexDownloadAction(const QUrl &url, NetJob *netjob)
 	: QuickModBaseDownloadAction(url), m_job(netjob)
 {
-	if (!m_indexList)
-	{
-		m_indexList = new QuickModIndexModel;
-	}
 }
 
 bool QuickModIndexDownloadAction::handle(const QByteArray &data)
@@ -32,7 +26,7 @@ bool QuickModIndexDownloadAction::handle(const QByteArray &data)
 		// FIXME: ALWAYS use original url (not the one that has followed redirects)!
 		// The alternative is to tell redirects apart.
 		// furthest node in transitive closure of permanent moves from first URL can be used as a new URL
-		m_indexList->setRepositoryIndexUrl(repo, m_url);
+		MMC->qmdb()->addRepo(repo, m_url);
 
 		const QJsonArray array = MMCJson::ensureArray(root.value("index"));
 		for (const QJsonValue itemVal : array)

@@ -12,8 +12,6 @@
 #include "logic/quickmod/net/QuickModBaseDownloadAction.h"
 #include "logic/MMCJson.h"
 #include "logic/OneSixInstance.h"
-#include "logic/settings/INISettingsObject.h"
-#include "logic/settings/Setting.h"
 
 QuickModDatabase::QuickModDatabase()
 	: QObject()
@@ -23,8 +21,6 @@ QuickModDatabase::QuickModDatabase()
 	ensureFilePathExists(m_dbFile);
 
 	m_timer.reset(new QTimer(this));
-	m_settings.reset(new INISettingsObject(m_configFile));
-	m_settings->registerSetting("Indices", QVariantMap());
 	
 	loadFromDisk();
 	connect(qApp, &QCoreApplication::aboutToQuit, this, &QuickModDatabase::flushToDisk);
@@ -36,6 +32,23 @@ void QuickModDatabase::setLastETagForURL(const QUrl &url, const QByteArray &ETag
 {
 	m_etags[url] = ETag;
 	delayedFlushToDisk();
+}
+
+// QUESTION replace aboutToReset/reset with specialized signals for repos/indices?
+void QuickModDatabase::addRepo(const QString &name, const QUrl &indexUrl)
+{
+	emit aboutToReset();
+	m_indices.insert(name, indexUrl);
+	delayedFlushToDisk();
+	emit reset();
+}
+
+void QuickModDatabase::removeRepo(const QString &name)
+{
+	emit aboutToReset();
+	m_indices.remove(name);
+	delayedFlushToDisk();
+	emit reset();
 }
 
 QByteArray QuickModDatabase::lastETagForURL(const QUrl &url) const
@@ -287,9 +300,16 @@ void QuickModDatabase::flushToDisk()
 		checksums.insert(it.key().toString(), QString::fromLatin1(it.value()));
 	}
 
+	QJsonObject indices;
+	for (auto it = m_indices.constBegin(); it != m_indices.constEnd(); ++it)
+	{
+		indices.insert(it.key(), it.value().toString());
+	}
+
 	QJsonObject root;
 	root.insert("mods", quickmods);
 	root.insert("checksums", checksums);
+	root.insert("indices", indices);
 
 	if (!ensureFilePathExists(m_dbFile))
 	{
@@ -318,6 +338,7 @@ void QuickModDatabase::loadFromDisk()
 		m_metadata.clear();
 		m_versions.clear();
 		m_etags.clear();
+		m_indices.clear();
 
 		const QJsonObject root =
 			ensureObject(MMCJson::parseFile(m_dbFile, "QuickMod Database"));
@@ -358,6 +379,12 @@ void QuickModDatabase::loadFromDisk()
 		for (auto it = checksums.constBegin(); it != checksums.constEnd(); ++it)
 		{
 			m_etags.insert(QUrl(it.key()), ensureString(it.value()).toLatin1());
+		}
+
+		const QJsonObject indices = ensureObject(root.value("indices"));
+		for (auto it = indices.constBegin(); it != indices.constEnd(); ++it)
+		{
+			m_indices.insert(it.key(), QUrl(ensureString(it.value())));
 		}
 	}
 	catch (MMCError &e)

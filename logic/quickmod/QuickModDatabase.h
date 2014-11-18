@@ -14,6 +14,7 @@ class QuickModVersion;
 class OneSixInstance;
 class QuickModDownloadAction;
 class QuickModBaseDownloadAction;
+class QuickModIndexModel;
 
 typedef std::shared_ptr<QuickModMetadata> QuickModMetadataPtr;
 typedef std::shared_ptr<QuickModVersion> QuickModVersionPtr;
@@ -89,6 +90,13 @@ public: /* methods */
 	/// update quickmod files
 	void updateFiles();
 
+public: // repo and index related
+	/// get all remembered indices
+	QHash<QString, QUrl> indices() const { return m_indices; }
+
+	void addRepo(const QString &name, const QUrl &indexUrl);
+	void removeRepo(const QString &name);
+
 signals:
 	void aboutToReset();
 	void reset();
@@ -110,6 +118,9 @@ private: /* data */
 	// FIXME: use metacache.
 	//    url   checksum
 	QHash<QUrl, QByteArray> m_etags;
+
+	//    repo     url
+	QHash<QString, QUrl> m_indices;
 
 	bool m_isDirty = false;
 	std::unique_ptr<QTimer> m_timer;

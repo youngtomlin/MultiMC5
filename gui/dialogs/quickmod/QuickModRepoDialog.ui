@@ -21,6 +21,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="removeBtn">
+       <property name="toolTip">
+        <string>This will stop downloading the index of the repository. It will not remove QuickMods that originate from that repository.</string>
+       </property>
        <property name="text">
         <string>Remove</string>
        </property>
