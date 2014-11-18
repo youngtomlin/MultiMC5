@@ -2,6 +2,7 @@
 #include "ui_PackagesPage.h"
 
 #include <QMessageBox>
+#include <QSortFilterProxyModel>
 
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "gui/widgets/PageContainer.h"
@@ -21,9 +22,12 @@ PackagesPage::PackagesPage(std::shared_ptr<OneSixInstance> instance, QWidget *pa
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
 
-	// FIXME: add a sorting proxy
-	m_model = new InstancePackageModel(m_instance->installedPackages());
-	ui->modTreeView->setModel(m_model);
+	QSortFilterProxyModel *sorter = new QSortFilterProxyModel(this);
+	sorter->setSourceModel(m_model = new InstancePackageModel(m_instance->installedPackages()));
+	sorter->setSortCaseSensitivity(Qt::CaseInsensitive);
+
+	ui->modTreeView->setModel(sorter);
+	ui->modTreeView->sortByColumn(1);
 
 	ui->modTreeView->setDragDropMode(QAbstractItemView::NoDragDrop);
 	ui->modTreeView->setSelectionMode(QAbstractItemView::SingleSelection);

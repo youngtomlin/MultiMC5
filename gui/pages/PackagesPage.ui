@@ -50,6 +50,9 @@
          <property name="dragDropMode">
           <enum>QAbstractItemView::DropOnly</enum>
          </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="1">
