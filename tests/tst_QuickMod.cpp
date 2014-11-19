@@ -108,24 +108,6 @@ private slots:
 		QCOMPARE(parsed->m_tags, mod->m_tags);
 		QCOMPARE(parsed->m_license, mod->m_license);
 	}
-
-	void testFileName_data()
-	{
-		QTest::addColumn<QUrl>("url");
-		QTest::addColumn<QuickModMetadataPtr>("mod");
-		QTest::addColumn<QString>("result");
-
-		QTest::newRow("jar") << QUrl("http://downloads.org/filename.jar") << TestsInternal::createMod("SomeMod") << "test_repo.SomeMod.jar";
-		QTest::newRow("jar, with version") << QUrl("https://notthewebpageyouarelookingfor.droids/mymod-4.2.jar") << TestsInternal::createMod("MyMod") << "test_repo.MyMod.jar";
-	}
-	void testFileName()
-	{
-		QFETCH(QUrl, url);
-		QFETCH(QuickModMetadataPtr, mod);
-		QFETCH(QString, result);
-
-		QCOMPARE(mod->fileName(url), result);
-	}
 };
 
 QTEST_GUILESS_MAIN(QuickModTest)

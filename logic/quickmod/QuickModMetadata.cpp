@@ -20,17 +20,20 @@
 #include <QJsonArray>
 #include <QVariant>
 
+#include "logic/quickmod/QuickModVersion.h"
+#include "logic/quickmod/QuickModImagesLoader.h"
 #include "logic/net/CacheDownload.h"
 #include "logic/net/NetJob.h"
-#include "MultiMC.h"
-#include "QuickModVersion.h"
-#include "modutils.h"
 #include "logic/MMCJson.h"
+
+#include "MultiMC.h"
+#include "modutils.h"
 
 #define CURRENT_QUICKMOD_VERSION 1
 
-QuickModMetadata::QuickModMetadata(QObject *parent) : QObject(parent), m_imagesLoaded(false)
+QuickModMetadata::QuickModMetadata()
 {
+	m_loader.reset(new QuickModImagesLoader(this));
 }
 
 QuickModMetadata::~QuickModMetadata()
@@ -39,12 +42,12 @@ QuickModMetadata::~QuickModMetadata()
 
 QIcon QuickModMetadata::icon()
 {
-	fetchImages();
+	m_loader->fetchImages();
 	return m_icon;
 }
 QPixmap QuickModMetadata::logo()
 {
-	fetchImages();
+	m_loader->fetchImages();
 	return m_logo;
 }
 
@@ -53,7 +56,7 @@ void QuickModMetadata::parse(const QJsonObject &mod)
 	auto version = MMCJson::ensureInteger(mod.value("formatVersion"), "'formatVersion'");
 	if (version > CURRENT_QUICKMOD_VERSION)
 	{
-		throw MMCError(tr("QuickMod format to new"));
+		throw MMCError(QObject::tr("QuickMod format to new"));
 	}
 
 	m_uid = QuickModRef(MMCJson::ensureString(mod.value("uid"), "'uid'"));
@@ -239,21 +242,21 @@ QString QuickModMetadata::humanUrlId(const QuickModMetadata::UrlType type)
 	switch (type)
 	{
 	case Website:
-		return tr("Website");
+		return QObject::tr("Website");
 	case Wiki:
-		return tr("Wiki");
+		return QObject::tr("Wiki");
 	case Forum:
-		return tr("Forum");
+		return QObject::tr("Forum");
 	case Donation:
-		return tr("Donation");
+		return QObject::tr("Donation");
 	case Issues:
-		return tr("Issues");
+		return QObject::tr("Issues");
 	case Source:
-		return tr("Source");
+		return QObject::tr("Source");
 	case Icon:
-		return tr("Icon");
+		return QObject::tr("Icon");
 	case Logo:
-		return tr("Logo");
+		return QObject::tr("Logo");
 	default:
 		return QString();
 	}
@@ -262,68 +265,4 @@ QList<QuickModMetadata::UrlType> QuickModMetadata::urlTypes()
 {
 	return QList<UrlType>() << Website << Wiki << Forum << Donation << Issues << Source << Icon
 							<< Logo;
-}
-
-void QuickModMetadata::iconDownloadFinished(int index)
-{
-	auto download = qobject_cast<CacheDownload *>(sender());
-	m_icon = QIcon(download->getTargetFilepath());
-	if (!m_icon.isNull())
-	{
-		emit iconUpdated(uid());
-	}
-}
-void QuickModMetadata::logoDownloadFinished(int index)
-{
-	auto download = qobject_cast<CacheDownload *>(sender());
-	m_logo = QPixmap(download->getTargetFilepath());
-	if (!m_logo.isNull())
-	{
-		emit logoUpdated(uid());
-	}
-}
-
-void QuickModMetadata::fetchImages()
-{
-	if (m_imagesLoaded)
-	{
-		return;
-	}
-	auto job = new NetJob("QuickMod image download: " + m_name);
-	bool download = false;
-	m_imagesLoaded = true;
-	if (iconUrl().isValid() && m_icon.isNull())
-	{
-		auto icon = CacheDownload::make(
-			iconUrl(), MMC->metacache()->resolveEntry("quickmods/icons", fileName(iconUrl())));
-		connect(icon.get(), &CacheDownload::succeeded, this, &QuickModMetadata::iconDownloadFinished);
-		icon->m_followRedirects = true;
-		job->addNetAction(icon);
-		download = true;
-	}
-	if (logoUrl().isValid() && m_logo.isNull())
-	{
-		auto logo = CacheDownload::make(
-			logoUrl(), MMC->metacache()->resolveEntry("quickmods/logos", fileName(logoUrl())));
-		connect(logo.get(), &CacheDownload::succeeded, this, &QuickModMetadata::logoDownloadFinished);
-		logo->m_followRedirects = true;
-		job->addNetAction(logo);
-		download = true;
-	}
-	if (download)
-	{
-		job->start();
-		connect(job, &NetJob::succeeded, job, &NetJob::deleteLater);
-		connect(job, &NetJob::failed, job, &NetJob::deleteLater);
-	}
-	else
-	{
-		delete job;
-	}
-}
-
-QString QuickModMetadata::fileName(const QUrl &url) const
-{
-	const QString path = url.path();
-	return internalUid() + path.mid(path.lastIndexOf("."));
 }

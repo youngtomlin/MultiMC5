@@ -26,16 +26,17 @@
 #include "gui/dialogs/quickmod/QuickModCreateFromInstanceDialog.h"
 #include "gui/dialogs/NewInstanceDialog.h"
 #include "gui/dialogs/CustomMessageBox.h"
-#include <gui/dialogs/VersionSelectDialog.h>
+#include "gui/dialogs/VersionSelectDialog.h"
 
 #include "logic/InstanceFactory.h"
-#include "logic/quickmod/QuickModMetadata.h"
-#include "logic/quickmod/InstancePackageList.h"
 #include "logic/OneSixInstance.h"
 
+#include "logic/quickmod/QuickModMetadata.h"
+#include "logic/quickmod/InstancePackageList.h"
 #include "logic/quickmod/QuickModModel.h"
-#include <logic/quickmod/Transaction.h>
-#include <logic/quickmod/QuickModVersionModel.h>
+#include "logic/quickmod/Transaction.h"
+#include "logic/quickmod/QuickModVersionModel.h"
+#include "logic/quickmod/QuickModImagesLoader.h"
 
 #include "MultiMC.h"
 
@@ -451,7 +452,7 @@ void QuickModBrowsePage::modSelectionChanged(const QItemSelection &selected,
 {
 	if (m_currentMod)
 	{
-		disconnect(m_currentMod.get(), &QuickModMetadata::logoUpdated, this,
+		disconnect(m_currentMod->imagesLoader(), &QuickModImagesLoader::logoUpdated, this,
 				   &QuickModBrowsePage::modLogoUpdated);
 	}
 
@@ -496,7 +497,7 @@ void QuickModBrowsePage::modSelectionChanged(const QItemSelection &selected,
 		ui->mcVersionsLabel->setText(mcVersions.join(", "));
 		ui->logoLabel->setPixmap(m_currentMod->logo());
 
-		connect(m_currentMod.get(), &QuickModMetadata::logoUpdated, this,
+		connect(m_currentMod->imagesLoader(), &QuickModImagesLoader::logoUpdated, this,
 				&QuickModBrowsePage::modLogoUpdated);
 	}
 }

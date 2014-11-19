@@ -9,6 +9,7 @@
 #include "logic/quickmod/InstancePackageList.h"
 #include "logic/quickmod/QuickModVersion.h"
 #include "logic/quickmod/QuickModMetadata.h"
+#include "logic/quickmod/QuickModImagesLoader.h"
 #include "logic/quickmod/net/QuickModBaseDownloadAction.h"
 #include "logic/MMCJson.h"
 #include "logic/OneSixInstance.h"
@@ -59,8 +60,8 @@ QByteArray QuickModDatabase::lastETagForURL(const QUrl &url) const
 void QuickModDatabase::addMod(QuickModMetadataPtr mod)
 {
 	m_metadata[mod->uid()][mod->repo()] = mod;
-	connect(mod.get(), &QuickModMetadata::iconUpdated, this, &QuickModDatabase::modIconUpdated);
-	connect(mod.get(), &QuickModMetadata::logoUpdated, this, &QuickModDatabase::modLogoUpdated);
+	connect(mod->imagesLoader(), &QuickModImagesLoader::iconUpdated, this, &QuickModDatabase::modIconUpdated);
+	connect(mod->imagesLoader(), &QuickModImagesLoader::logoUpdated, this, &QuickModDatabase::modLogoUpdated);
 	delayedFlushToDisk();
 	emit justAddedMod(mod->uid());
 }

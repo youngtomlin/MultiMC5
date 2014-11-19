@@ -26,15 +26,14 @@
 #include "MMCError.h"
 #include "QuickModRef.h"
 
-// TODO move icon/logo downloading somewhere else, and remove the QObject superclass
+class QuickModImagesLoader;
 
 typedef std::shared_ptr<class QuickModMetadata> QuickModMetadataPtr;
 
-class QuickModMetadata : public QObject, public std::enable_shared_from_this<QuickModMetadata>
+class QuickModMetadata : public std::enable_shared_from_this<QuickModMetadata>
 {
-	Q_OBJECT
 public:
-	explicit QuickModMetadata(QObject *parent = 0);
+	explicit QuickModMetadata();
 	~QuickModMetadata();
 
 	bool isValid() const
@@ -149,20 +148,14 @@ public:
 	static QString humanUrlId(const UrlType type);
 	static QList<UrlType> urlTypes();
 
-signals:
-	void iconUpdated(QuickModRef uid);
-	void logoUpdated(QuickModRef uid);
-
-private
-slots:
-	void iconDownloadFinished(int index);
-	void logoDownloadFinished(int index);
+	QuickModImagesLoader *imagesLoader() const { return m_loader.get(); }
 
 private:
 	friend class QuickModFilesUpdater;
 	friend class QuickModTest;
 	friend class QuickModModelTest;
 	friend class QuickModBuilder;
+	friend class QuickModImagesLoader;
 	friend class TestsInternal;
 	QuickModRef m_uid;
 	QString m_repo;
@@ -179,10 +172,7 @@ private:
 	QStringList m_tags;
 	QString m_license;
 
-	bool m_imagesLoaded;
-
-	void fetchImages();
-	QString fileName(const QUrl &url) const;
+	std::unique_ptr<QuickModImagesLoader> m_loader;
 };
 
 Q_DECLARE_METATYPE(QuickModMetadataPtr)
