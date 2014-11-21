@@ -37,7 +37,7 @@ private: /* methods */
 	void insert(InstancePackagePtr mod);
 
 public: /* methods */
-	virtual ~InstancePackageList(){};
+	virtual ~InstancePackageList() {}
 
 	bool isQuickmodInstalled(const QuickModRef &mod);
 	bool isQuickmodWanted(const QuickModRef &mod);

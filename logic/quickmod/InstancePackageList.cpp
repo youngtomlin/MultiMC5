@@ -26,20 +26,18 @@ InstancePackageList::InstancePackageList(std::shared_ptr< OneSixInstance > paren
 
 QuickModVersionRef InstancePackageList::installedQuickModVersion(const QuickModRef& mod)
 {
-	auto moditer = installedMods_index.find(mod.toString());
-	if(moditer != installedMods_index.end())
+	if (isQuickmodInstalled(mod))
 	{
-		return QuickModVersionRef(mod, (*moditer)->version);
+		return QuickModVersionRef(mod, installedMods_index[mod.toString()]->version);
 	}
 	return QuickModVersionRef();
 }
 
 bool InstancePackageList::installedQuickIsHardDep(const QuickModRef& mod)
 {
-	auto moditer = installedMods_index.find(mod.toString());
-	if(moditer != installedMods_index.end())
+	if (isQuickmodInstalled(mod))
 	{
-		return !(*moditer)->asDependency;
+		return !installedMods_index[mod.toString()]->asDependency;
 	}
 	return false;
 }

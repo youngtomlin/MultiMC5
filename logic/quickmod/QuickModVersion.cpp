@@ -139,7 +139,7 @@ QuickModDownload BaseQuickModVersion::highestPriorityDownload(const QuickModDown
 QList<QuickModVersionPtr> BaseQuickModVersion::parse(const QJsonObject &object, QuickModMetadataPtr mod)
 {
 	QList<QuickModVersionPtr> out;
-	for (auto versionVal : MMCJson::ensureObject(object.value("versions")))
+	for (auto versionVal : MMCJson::ensureArray(object.value("versions"), "'versions'"))
 	{
 		out.append(parseSingle(MMCJson::ensureObject(versionVal), mod));
 	}

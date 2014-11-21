@@ -103,6 +103,20 @@ bool Util::versionIsInInterval(const Version &version, const QString &interval)
 		return true;
 	}
 
+	// A list of versions is used
+	if (!interval.contains(QRegularExpression("[\\[\\]\\(\\)]")))
+	{
+		const QStringList versions = interval.split(",");
+		for (const auto ver : versions)
+		{
+			if (Util::Version(ver) == version)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// Interval notation is used
 	QRegularExpression exp(
 		"(?<start>[\\[\\]\\(\\)])(?<bottom>.*?)(,(?<top>.*?))?(?<end>[\\[\\]\\(\\)]),?");

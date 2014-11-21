@@ -145,12 +145,9 @@ protected:
 		if (!m_mcVersion.isEmpty())
 		{
 			auto acceptedVersions = index.data(QuickModModel::MCVersionsRole).toStringList();
-			for (auto version : acceptedVersions)
+			if (!Util::versionIsInInterval(Util::Version(m_mcVersion), acceptedVersions.join(',')))
 			{
-				if (!Util::versionIsInInterval(Util::Version(m_mcVersion), version))
-				{
-					return false;
-				}
+				return false;
 			}
 		}
 		if (!m_fulltext.isEmpty())

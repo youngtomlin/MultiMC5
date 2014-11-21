@@ -207,11 +207,11 @@ QVariant InstancePackageModel::headerData(int section, Qt::Orientation orientati
 		case EnabledColumn:
 			return QString();
 		case NameColumn:
-			return QString("Name");
+			return tr("Name");
 		case VersionColumn:
-			return QString("Version");
+			return tr("Version");
 		case NewVersionColumn:
-			return QString("New Version");
+			return tr("New Version");
 		default:
 			return QVariant();
 		}
@@ -220,13 +220,13 @@ QVariant InstancePackageModel::headerData(int section, Qt::Orientation orientati
 		switch (section)
 		{
 		case EnabledColumn:
-			return "Is the component enabled?";
+			return tr("Is the component enabled?");
 		case NameColumn:
-			return "The name of the component.";
+			return tr("The name of the component.");
 		case VersionColumn:
-			return "The version of the component.";
+			return tr("The version of the component.");
 		case NewVersionColumn:
-			return "The new version of the component.";
+			return tr("The new version of the component.");
 		default:
 			return QVariant();
 		}
@@ -333,7 +333,7 @@ QVariant InstancePackageModel::newVersionData(int row, int role) const
 			{
 				if(a.type==Transaction::Action::Remove)
 					return tr("Remove");
-				return a.targetVersion;
+				return QuickModVersionRef(QuickModRef(qm_uid), a.targetVersion).userFacing();
 			}
 		}
 		if (t.instance)
