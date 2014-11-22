@@ -21,7 +21,7 @@ public:
 	QString m_errorString;
 
 	QUrl m_originalUrl;
-	QString m_expectedChecksum;
+	QString m_expectedETag;
 
 public slots:
 	void start() override;

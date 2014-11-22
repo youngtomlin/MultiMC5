@@ -51,7 +51,7 @@ QuickModBaseDownloadActionPtr QuickModBaseDownloadAction::make(NetJob *netjob, c
 	{
 		ret = std::make_shared<QuickModDownloadAction>(url, uid);
 	}
-	ret->m_expectedChecksum = MMC->metacache()->resolveEntry("quickmods/quickmods", repo + '#' + uid)->etag;
+	ret->m_expectedETag = MMC->metacache()->resolveEntry("quickmods/quickmods", repo + '#' + uid)->etag;
 	return ret;
 }
 
@@ -66,7 +66,7 @@ void QuickModBaseDownloadAction::start()
 	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
-	request.setRawHeader("If-None-Match", m_expectedChecksum.toLatin1());
+	request.setRawHeader("If-None-Match", m_expectedETag.toLatin1());
 	QNetworkReply *rep = MMC->qnam()->get(request);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
@@ -129,9 +129,9 @@ void QuickModBaseDownloadAction::downloadFinished()
 	
 	if (m_reply->hasRawHeader("ETag"))
 	{
-		const QByteArray receivedHash = m_reply->rawHeader("ETag").replace("\"", "");
+		const QByteArray receivedHash = m_reply->rawHeader("ETag");
 		// cache hit? success!
-		if(m_expectedChecksum == receivedHash)
+		if(m_expectedETag == receivedHash)
 		{
 			m_status = Job_Finished;
 			emit succeeded(m_index_within_job);
@@ -148,7 +148,7 @@ void QuickModBaseDownloadAction::downloadFinished()
 		entry->url = m_originalUrl.toString(QUrl::RemovePassword | QUrl::NormalizePathSegments);
 		if (m_reply->hasRawHeader("ETag"))
 		{
-			entry->etag = m_reply->rawHeader("ETag").replace("\"", "");
+			entry->etag = m_reply->rawHeader("ETag");
 		}
 		entry->stale = false;
 		MMC->metacache()->updateEntry(entry);
