@@ -536,18 +536,19 @@ void MultiMC::initGlobalSettings()
 void MultiMC::initHttpMetaCache()
 {
 	m_metacache.reset(new HttpMetaCache("metacache"));
-	m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
-	m_metacache->addBase("asset_objects", QDir("assets/objects").absolutePath());
-	m_metacache->addBase("versions", QDir("versions").absolutePath());
-	m_metacache->addBase("libraries", QDir("libraries").absolutePath());
-	m_metacache->addBase("minecraftforge", QDir("mods/minecraftforge").absolutePath());
-	m_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs").absolutePath());
-	m_metacache->addBase("liteloader", QDir("mods/liteloader").absolutePath());
-	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
-	m_metacache->addBase("quickmods/icons", QDir("quickmods/images/icons").absolutePath());
-	m_metacache->addBase("quickmods/logos", QDir("quickmods/images/logos").absolutePath());
-	m_metacache->addBase("quickmods/cache", QDir("quickmods/cache").absolutePath());
-	m_metacache->addBase("root", QDir(root()).absolutePath());
+	m_metacache->addBase("asset_indexes", QDir("assets/indexes"));
+	m_metacache->addBase("asset_objects", QDir("assets/objects"));
+	m_metacache->addBase("versions", QDir("versions"));
+	m_metacache->addBase("libraries", QDir("libraries"));
+	m_metacache->addBase("minecraftforge", QDir("mods/minecraftforge"));
+	m_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs"));
+	m_metacache->addBase("liteloader", QDir("mods/liteloader"));
+	m_metacache->addBase("skins", QDir("accounts/skins"));
+	m_metacache->addBase("quickmods/icons", QDir("quickmods/images/icons"));
+	m_metacache->addBase("quickmods/logos", QDir("quickmods/images/logos"));
+	m_metacache->addBase("quickmods/cache", QDir("quickmods/cache"));
+	m_metacache->addBase("quickmods/quickmods", QDir("quickmods/quickmods"));
+	m_metacache->addBase("root", QDir(root()));
 	m_metacache->Load();
 }
 

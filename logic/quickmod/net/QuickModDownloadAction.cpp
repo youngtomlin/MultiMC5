@@ -32,7 +32,7 @@ bool QuickModDownloadAction::handle(const QByteArray &data)
 		const QString &uid = MMCJson::ensureString(root.value("uid"));
 		if (!m_expectedUid.isEmpty() && uid != m_expectedUid)
 		{
-			throw MMCError("UID of the received QuickMod isn't matching the expectations");
+			throw MMCError("UID of the received QuickMod isn't matching the expectations (got " + uid + ", expected " + m_expectedUid + ")");
 		}
 		m_resultMetadata = std::make_shared<QuickModMetadata>();
 		m_resultMetadata->parse(root);
@@ -49,4 +49,9 @@ bool QuickModDownloadAction::handle(const QByteArray &data)
 		return false;
 	}
 	return true;
+}
+
+QString QuickModDownloadAction::cacheIdentifier() const
+{
+	return m_resultMetadata->internalUid();
 }

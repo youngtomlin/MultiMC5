@@ -11,10 +11,11 @@ public:
 	explicit QuickModIndexDownloadAction(const QUrl &url, NetJob *netjob);
 
 public:
-	QString m_expectedUid;
+	QString m_repo;
 
 	NetJob *m_job;
 
 private:
 	bool handle(const QByteArray &data);
+	QString cacheIdentifier() const override;
 };

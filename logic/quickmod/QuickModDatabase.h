@@ -37,18 +37,6 @@ private: /* methods */
 	/// add a separately constructed version
 	void addVersion(QuickModVersionPtr version);
 
-	/**
-	 * retrieve ETag from last download of url.
-	 * FIXME: use metacache instead.
-	 */
-	QByteArray lastETagForURL(const QUrl &url) const;
-
-	/**
-	 * set ETag for last download of url
-	 * FIXME: use metacache instead.
-	 */
-	void setLastETagForURL(const QUrl &url, const QByteArray &checksum);
-
 public: /* methods */
 	/// get the current list of installed mod UIDs
 	QList<QuickModRef> getPackageUIDs() const;
@@ -114,10 +102,6 @@ private: /* data */
 	QHash<QuickModRef, QHash<QString, QuickModMetadataPtr>> m_metadata;
 	//    uid            version  data
 	QHash<QuickModRef, QHash<QString, QuickModVersionPtr>> m_versions;
-
-	// FIXME: use metacache.
-	//    url   checksum
-	QHash<QUrl, QByteArray> m_etags;
 
 	//    repo     url
 	QHash<QString, QUrl> m_indices;

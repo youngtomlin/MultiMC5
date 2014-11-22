@@ -16,7 +16,7 @@
 #pragma once
 #include <QString>
 #include <QMap>
-#include <qtimer.h>
+#include <QTimer>
 
 struct MetaEntry
 {
@@ -24,6 +24,7 @@ struct MetaEntry
 	QString path;
 	QString md5sum;
 	QString etag;
+	QString url;
 	qint64 local_changed_timestamp = 0;
 	QString remote_changed_timestamp; // QString for now, RFC 2822 encoded time
 	bool stale = true;
@@ -31,6 +32,7 @@ struct MetaEntry
 };
 
 typedef std::shared_ptr<MetaEntry> MetaEntryPtr;
+class QDir;
 
 class HttpMetaCache : public QObject
 {
@@ -48,10 +50,14 @@ public:
 	MetaEntryPtr resolveEntry(QString base, QString resource_path,
 							  QString expected_etag = QString());
 
+	// get all entries for a given base
+	QList<MetaEntryPtr> getEntries(const QString &base);
+
 	// add a previously resolved stale entry
 	bool updateEntry(MetaEntryPtr stale_entry);
 
 	void addBase(QString base, QString base_root);
+	void addBase(const QString &base, const QDir &baseRoot);
 
 	// (re)start a timer that calls SaveNow later.
 	void SaveEventually();

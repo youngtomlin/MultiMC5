@@ -117,6 +117,12 @@ MetaEntryPtr HttpMetaCache::resolveEntry(QString base, QString resource_path,
 	return entry;
 }
 
+QList<MetaEntryPtr> HttpMetaCache::getEntries(const QString &base)
+{
+	Q_ASSERT(m_entries.contains(base));
+	return m_entries[base].entry_list.values();
+}
+
 bool HttpMetaCache::updateEntry(MetaEntryPtr stale_entry)
 {
 	if (!m_entries.contains(stale_entry->base))
@@ -153,6 +159,10 @@ void HttpMetaCache::addBase(QString base, QString base_root)
 	EntryMap foo;
 	foo.base_path = base_root;
 	m_entries[base] = foo;
+}
+void HttpMetaCache::addBase(const QString &base, const QDir &baseRoot)
+{
+	addBase(base, baseRoot.absolutePath());
 }
 
 QString HttpMetaCache::getBasePath(QString base)
@@ -200,6 +210,7 @@ void HttpMetaCache::Load()
 		QString path = foo->path = element_obj.value("path").toString();
 		foo->md5sum = element_obj.value("md5sum").toString();
 		foo->etag = element_obj.value("etag").toString();
+		foo->url = element_obj.value("url").toString();
 		foo->local_changed_timestamp = element_obj.value("last_changed_timestamp").toDouble();
 		foo->remote_changed_timestamp =
 			element_obj.value("remote_changed_timestamp").toString();
@@ -233,6 +244,7 @@ void HttpMetaCache::SaveNow()
 			entryObj.insert("path", QJsonValue(entry->path));
 			entryObj.insert("md5sum", QJsonValue(entry->md5sum));
 			entryObj.insert("etag", QJsonValue(entry->etag));
+			entryObj.insert("url", QJsonValue(entry->url));
 			entryObj.insert("last_changed_timestamp",
 							QJsonValue(double(entry->local_changed_timestamp)));
 			if (!entry->remote_changed_timestamp.isEmpty())

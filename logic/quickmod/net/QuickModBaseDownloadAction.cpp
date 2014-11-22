@@ -6,6 +6,8 @@
 #include "logic/quickmod/net/QuickModDownloadAction.h"
 #include "logic/quickmod/net/QuickModIndexDownloadAction.h"
 #include "logic/quickmod/QuickModDatabase.h"
+#include "logic/net/HttpMetaCache.h"
+#include "MultiMC.h"
 
 /*
  * FIXME: this actually fixes some kind of Qt bug that we should report.
@@ -38,8 +40,7 @@ QuickModBaseDownloadAction::QuickModBaseDownloadAction(const QUrl &url) : NetAct
 }
 
 QuickModBaseDownloadActionPtr QuickModBaseDownloadAction::make(NetJob *netjob, const QUrl &url,
-															   const QString &uid,
-															   const QByteArray &checksum)
+															   const QString &repo, const QString &uid)
 {
 	QuickModBaseDownloadActionPtr ret;
 	if (url.path().endsWith("index.json"))
@@ -50,7 +51,7 @@ QuickModBaseDownloadActionPtr QuickModBaseDownloadAction::make(NetJob *netjob, c
 	{
 		ret = std::make_shared<QuickModDownloadAction>(url, uid);
 	}
-	ret->m_expectedChecksum = checksum;
+	ret->m_expectedChecksum = MMC->metacache()->resolveEntry("quickmods/quickmods", repo + '#' + uid)->etag;
 	return ret;
 }
 
@@ -65,7 +66,7 @@ void QuickModBaseDownloadAction::start()
 	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
-	request.setRawHeader("If-None-Match", m_expectedChecksum);
+	request.setRawHeader("If-None-Match", m_expectedChecksum.toLatin1());
 	QNetworkReply *rep = MMC->qnam()->get(request);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
@@ -126,11 +127,9 @@ void QuickModBaseDownloadAction::downloadFinished()
 		return;
 	}
 	
-	if(m_reply->hasRawHeader("ETag"))
+	if (m_reply->hasRawHeader("ETag"))
 	{
 		const QByteArray receivedHash = m_reply->rawHeader("ETag").replace("\"", "");
-		//FIXME: use metacache, not this.
-		MMC->qmdb()->setLastETagForURL(m_originalUrl, receivedHash);
 		// cache hit? success!
 		if(m_expectedChecksum == receivedHash)
 		{
@@ -145,6 +144,15 @@ void QuickModBaseDownloadAction::downloadFinished()
 
 	if (handle(m_reply->readAll()))
 	{
+		auto entry = MMC->metacache()->resolveEntry("quickmods/quickmods", cacheIdentifier());
+		entry->url = m_originalUrl.toString(QUrl::RemovePassword | QUrl::NormalizePathSegments);
+		if (m_reply->hasRawHeader("ETag"))
+		{
+			entry->etag = m_reply->rawHeader("ETag").replace("\"", "");
+		}
+		entry->stale = false;
+		MMC->metacache()->updateEntry(entry);
+
 		// nothing went wrong...
 		m_status = Job_Finished;
 		emit succeeded(m_index_within_job);

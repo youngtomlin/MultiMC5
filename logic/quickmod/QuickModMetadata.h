@@ -60,7 +60,7 @@ public:
 	}
 	QString internalUid() const
 	{
-		return m_repo + '.' + m_uid.toString();
+		return m_repo + '#' + m_uid.toString();
 	}
 
 	QString repo() const

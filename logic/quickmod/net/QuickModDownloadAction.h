@@ -25,4 +25,5 @@ public:
 
 private:
 	bool handle(const QByteArray &data) override;
+	QString cacheIdentifier() const override;
 };

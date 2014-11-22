@@ -11,8 +11,8 @@ class QuickModBaseDownloadAction : public NetAction
 public:
 	explicit QuickModBaseDownloadAction(const QUrl &url);
 	static QuickModBaseDownloadActionPtr make(NetJob *netjob, const QUrl &url,
-											  const QString &uid = QString(),
-											  const QByteArray &checksum = QByteArray());
+											  const QString &repo = QString(),
+											  const QString &uid = QString());
 	virtual ~QuickModBaseDownloadAction()
 	{
 	}
@@ -21,7 +21,7 @@ public:
 	QString m_errorString;
 
 	QUrl m_originalUrl;
-	QByteArray m_expectedChecksum;
+	QString m_expectedChecksum;
 
 public slots:
 	void start() override;
@@ -36,4 +36,5 @@ protected slots:
 
 protected:
 	virtual bool handle(const QByteArray &data) = 0;
+	virtual QString cacheIdentifier() const = 0;
 };

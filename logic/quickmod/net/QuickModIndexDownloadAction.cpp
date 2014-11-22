@@ -20,20 +20,17 @@ bool QuickModIndexDownloadAction::handle(const QByteArray &data)
 	try
 	{
 		const QJsonObject root = MMCJson::ensureObject(MMCJson::parseDocument(data, "QuickMod Index"));
-		const QString repo = MMCJson::ensureString(root.value("repo"));
 		const QString baseUrlString = MMCJson::ensureString(root.value("baseUrl"));
+		m_repo = MMCJson::ensureString(root.value("repo"));
 
-		// FIXME: ALWAYS use original url (not the one that has followed redirects)!
-		// The alternative is to tell redirects apart.
-		// furthest node in transitive closure of permanent moves from first URL can be used as a new URL
-		MMC->qmdb()->addRepo(repo, m_url);
+		MMC->qmdb()->addRepo(m_repo, m_originalUrl);
 
 		const QJsonArray array = MMCJson::ensureArray(root.value("index"));
 		for (const QJsonValue itemVal : array)
 		{
 			const QJsonObject itemObj = MMCJson::ensureObject(itemVal);
 			const QString uid = MMCJson::ensureString(itemObj.value("uid"));
-			if (!MMC->qmdb()->haveUid(QuickModRef(uid), repo))
+			if (!MMC->qmdb()->haveUid(QuickModRef(uid), m_repo))
 			{
 				const QString urlString = MMCJson::ensureString(itemObj.value("url"));
 				QUrl url;
@@ -45,7 +42,7 @@ bool QuickModIndexDownloadAction::handle(const QByteArray &data)
 				{
 					url = QUrl(baseUrlString).resolved(QUrl(urlString));
 				}
-				m_job->addNetAction(QuickModBaseDownloadAction::make(m_job, url, uid));
+				m_job->addNetAction(QuickModBaseDownloadAction::make(m_job, url, m_repo, uid));
 			}
 		}
 	}
@@ -55,4 +52,9 @@ bool QuickModIndexDownloadAction::handle(const QByteArray &data)
 		return false;
 	}
 	return true;
+}
+
+QString QuickModIndexDownloadAction::cacheIdentifier() const
+{
+	return m_repo.isEmpty() ? m_originalUrl.toString(QUrl::RemovePassword | QUrl::NormalizePathSegments).replace("/", "\\/") : m_repo;
 }

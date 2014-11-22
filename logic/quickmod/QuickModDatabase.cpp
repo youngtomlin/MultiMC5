@@ -11,8 +11,10 @@
 #include "logic/quickmod/QuickModMetadata.h"
 #include "logic/quickmod/QuickModImagesLoader.h"
 #include "logic/quickmod/net/QuickModBaseDownloadAction.h"
+#include "logic/net/HttpMetaCache.h"
 #include "logic/MMCJson.h"
 #include "logic/OneSixInstance.h"
+#include "MultiMC.h"
 
 QuickModDatabase::QuickModDatabase()
 	: QObject()
@@ -27,12 +29,6 @@ QuickModDatabase::QuickModDatabase()
 	connect(qApp, &QCoreApplication::aboutToQuit, this, &QuickModDatabase::flushToDisk);
 	connect(m_timer.get(), &QTimer::timeout, this, &QuickModDatabase::flushToDisk);
 	updateFiles();
-}
-
-void QuickModDatabase::setLastETagForURL(const QUrl &url, const QByteArray &ETag)
-{
-	m_etags[url] = ETag;
-	delayedFlushToDisk();
 }
 
 // QUESTION replace aboutToReset/reset with specialized signals for repos/indices?
@@ -50,11 +46,6 @@ void QuickModDatabase::removeRepo(const QString &name)
 	m_indices.remove(name);
 	delayedFlushToDisk();
 	emit reset();
-}
-
-QByteArray QuickModDatabase::lastETagForURL(const QUrl &url) const
-{
-	return m_etags[url];
 }
 
 void QuickModDatabase::addMod(QuickModMetadataPtr mod)
@@ -243,15 +234,12 @@ void QuickModDatabase::registerMod(const QUrl &url)
 void QuickModDatabase::updateFiles()
 {
 	NetJob *job = new NetJob("QuickMod Download");
-	for (auto mod : m_metadata)
+	for (auto entry : MMC->metacache()->getEntries("quickmods/quickmods"))
 	{
-		for (auto meta : mod)
-		{
-			auto lastETag = lastETagForURL(meta->updateUrl());
-			auto download = QuickModBaseDownloadAction::make(job, meta->updateUrl(),
-															 meta->uid().toString(), lastETag);
-			job->addNetAction(download);
-		}
+		auto download = QuickModBaseDownloadAction::make(job, entry->url,
+														 entry->path.mid(0, entry->path.indexOf('#')),
+														 entry->path.mid(entry->path.indexOf('#') + 1));
+		job->addNetAction(download);
 	}
 	connect(job, &NetJob::succeeded, job, &NetJob::deleteLater);
 	connect(job, &NetJob::failed, job, &NetJob::deleteLater);
@@ -300,12 +288,6 @@ void QuickModDatabase::flushToDisk()
 		quickmods.insert(it.key().toString(), obj);
 	}
 
-	QJsonObject checksums;
-	for (auto it = m_etags.constBegin(); it != m_etags.constEnd(); ++it)
-	{
-		checksums.insert(it.key().toString(), QString::fromLatin1(it.value()));
-	}
-
 	QJsonObject indices;
 	for (auto it = m_indices.constBegin(); it != m_indices.constEnd(); ++it)
 	{
@@ -314,7 +296,6 @@ void QuickModDatabase::flushToDisk()
 
 	QJsonObject root;
 	root.insert("mods", quickmods);
-	root.insert("checksums", checksums);
 	root.insert("indices", indices);
 
 	if (!ensureFilePathExists(m_dbFile))
@@ -343,7 +324,6 @@ void QuickModDatabase::loadFromDisk()
 		emit aboutToReset();
 		m_metadata.clear();
 		m_versions.clear();
-		m_etags.clear();
 		m_indices.clear();
 
 		const QJsonObject root =
@@ -379,12 +359,6 @@ void QuickModDatabase::loadFromDisk()
 							*(m_metadata[QuickModRef(uid)].begin()));
 				}
 			}
-		}
-
-		const QJsonObject checksums = ensureObject(root.value("checksums"));
-		for (auto it = checksums.constBegin(); it != checksums.constEnd(); ++it)
-		{
-			m_etags.insert(QUrl(it.key()), ensureString(it.value()).toLatin1());
 		}
 
 		const QJsonObject indices = ensureObject(root.value("indices"));
