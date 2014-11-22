@@ -65,3 +65,9 @@ uint qHash(const QuickModVersionRef &ref)
 	return qHash(ref.mod().toString() + ref.toString());
 }
 //END
+
+QDebug operator<<(QDebug dbg, QuickModVersionRef ref)
+{
+	dbg.nospace() << "QuickModVersionRef(version=" << ref.toString() << " name=" << ref.userFacing() << ")";
+	return dbg.maybeSpace();
+}

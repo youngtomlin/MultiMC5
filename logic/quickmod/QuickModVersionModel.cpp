@@ -1,4 +1,5 @@
 #include "QuickModVersionModel.h"
+
 #include "QuickModVersionRef.h"
 #include "QuickModVersion.h"
 #include "QuickModDatabase.h"
@@ -9,11 +10,12 @@ QuickModVersionModel::QuickModVersionModel(QuickModRef mod, QString mcVersion, Q
 	: BaseVersionList(parent), m_mod(mod), m_mcVersion(mcVersion)
 {
 	m_versions = MMC->qmdb()->versions(mod, m_mcVersion);
+	std::sort(m_versions.begin(), m_versions.end(), std::greater<QuickModVersionRef>());
 }
 
 Task *QuickModVersionModel::getLoadTask()
 {
-	return 0;
+	return nullptr;
 }
 bool QuickModVersionModel::isLoaded()
 {

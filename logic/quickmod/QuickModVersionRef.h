@@ -34,5 +34,6 @@ public:
 	}
 };
 uint qHash(const QuickModVersionRef &ref);
+QDebug operator<<(QDebug dbg, QuickModVersionRef ref);
 
 Q_DECLARE_METATYPE(QuickModVersionRef)
