@@ -713,6 +713,9 @@ SET(MULTIMC_SOURCES
 	logic/liteloader/LiteLoaderInstaller.cpp
 	logic/liteloader/LiteLoaderVersionList.h
 	logic/liteloader/LiteLoaderVersionList.cpp
+
+	logic/FileHashCache.h
+	logic/FileHashCache.cpp
 )
 
 
