@@ -336,10 +336,6 @@ QVariant InstancePackageModel::newVersionData(int row, int role) const
 				return QuickModVersionRef(QuickModRef(qm_uid), a.targetVersion).userFacing();
 			}
 		}
-		if (t.instance)
-		{
-			return m_list->installedQuickModVersion(QuickModRef(qm_uid)).userFacing();
-		}
 		return tr("None");
 	}
 	default:

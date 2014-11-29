@@ -29,6 +29,7 @@ public: /* data types */
 		QString origVersion;
 		QString targetRepo;
 		QString targetVersion;
+		bool installedAsDep = false;
 		enum Type
 		{
 			Invalid,

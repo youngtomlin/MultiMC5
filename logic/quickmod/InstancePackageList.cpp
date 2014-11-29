@@ -28,7 +28,7 @@ QuickModVersionRef InstancePackageList::installedQuickModVersion(const QuickModR
 {
 	if (isQuickmodInstalled(mod))
 	{
-		return QuickModVersionRef(mod, installedMods_index[mod.toString()]->version);
+		return QuickModVersionRef(mod, installedMods_index[mod.toString()]->qm_version);
 	}
 	return QuickModVersionRef();
 }
@@ -80,6 +80,35 @@ std::shared_ptr< Transaction > InstancePackageList::getTransaction()
 
 void InstancePackageList::transactionApplied()
 {
+	for (const auto action: transaction->getActions())
+	{
+		if (action.type == Transaction::Action::Add || action.type == Transaction::Action::ChangeVersion)
+		{
+			InstancePackagePtr ptr = std::make_shared<InstancePackage>();
+			ptr->name = MMC->qmdb()->version(action.uid, action.targetVersion, action.targetRepo)->mod->uid().userFacing();
+			ptr->version = MMC->qmdb()->version(action.uid, action.targetVersion, action.targetRepo)->name();
+			ptr->qm_uid = action.uid;
+			ptr->qm_repo = action.targetRepo;
+			ptr->qm_version = action.targetVersion;
+			ptr->qm_updateUrl = MMC->qmdb()->version(action.uid, action.targetVersion, action.targetRepo)->mod->updateUrl().toString(QUrl::FullyEncoded);
+			ptr->asDependency = action.installedAsDep;
+			if (installedMods_index.contains(ptr->qm_uid))
+			{
+				installedMods.replace(installedMods.indexOf(installedMods_index[ptr->qm_uid]),
+						ptr);
+				installedMods_index.insert(ptr->qm_uid, ptr);
+			}
+			else
+			{
+				insert(ptr);
+			}
+		}
+		else
+		{
+			installedMods.removeAll(installedMods_index[action.uid]);
+			installedMods_index.remove(action.uid);
+		}
+	}
 	transaction.reset();
 	saveToFile("components.json");
 }

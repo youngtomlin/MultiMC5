@@ -11,6 +11,7 @@ std::shared_ptr<InstancePackage> InstancePackage::parse(const QJsonObject &value
 	mod->version = ensureString(valueObject.value("version"));
 	mod->qm_uid = ensureString(valueObject.value("qm_uid"));
 	mod->qm_repo = ensureString(valueObject.value("qm_repo"));
+	mod->qm_version = ensureString(valueObject.value("qm_version"));
 	mod->qm_updateUrl = ensureString(valueObject.value("qm_updateUrl"));
 	mod->asDependency = valueObject.value("asDependency").toBool();
 	mod->installedPatch = valueObject.value("installedPatch").toString();
@@ -36,6 +37,7 @@ QJsonObject InstancePackage::serialize()
 
 	obj.insert("qm_uid", qm_uid);
 	obj.insert("qm_repo", qm_repo);
+	obj.insert("qm_version", qm_version);
 	obj.insert("name", name);
 	obj.insert("version", version);
 	obj.insert("qm_updateUrl", qm_updateUrl);

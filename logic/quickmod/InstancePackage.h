@@ -26,6 +26,7 @@ private: /* variables */
 	bool asDependency = false;
 	QString qm_uid;
 	QString qm_repo;
+	QString qm_version;
 	QString qm_updateUrl;
 	QString installedPatch;
 	QList<File> installedFiles;
