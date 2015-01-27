@@ -93,7 +93,7 @@
 #include "logic/BaseInstance.h"
 #include "logic/OneSixInstance.h"
 #include "logic/InstanceFactory.h"
-#include "logic/MinecraftProcess.h"
+#include "logic/BaseProcess.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/java/JavaUtils.h"
 #include "logic/NagUtils.h"
@@ -733,7 +733,8 @@ void MainWindow::setCatBackground(bool enabled)
 	}
 }
 
-void MainWindow::on_actionAddInstance_triggered()
+// FIXME: eliminate, should not be needed
+void MainWindow::waitForMinecraftVersions()
 {
 	if (!MMC->minecraftlist()->isLoaded() && m_versionLoadTask &&
 		m_versionLoadTask->isRunning())
@@ -743,32 +744,31 @@ void MainWindow::on_actionAddInstance_triggered()
 		waitLoop.connect(m_versionLoadTask, SIGNAL(succeeded()), SLOT(quit()));
 		waitLoop.exec();
 	}
+}
 
-	NewInstanceDialog newInstDlg(this);
-	if (!newInstDlg.exec())
-		return;
-
-	MMC->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
-
+void MainWindow::createInstance(QString instName, QString instGroup, QString instIcon,
+								BaseVersionPtr version)
+{
 	InstancePtr newInstance;
 
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
-	QString instDirName = DirNameFromString(newInstDlg.instName(), instancesDir);
+	QString instDirName = DirNameFromString(instName, instancesDir);
 	QString instDir = PathCombine(instancesDir, instDirName);
 
 	auto &loader = InstanceFactory::get();
 
-	auto error = loader.createInstance(newInstance, newInstDlg.selectedVersion(), instDir);
+	auto error = loader.createInstance(newInstance, version, instDir);
 	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
 	switch (error)
 	{
 	case InstanceFactory::NoCreateError:
 	{
-		newInstance->setName(newInstDlg.instName());
-		newInstance->setIconKey(newInstDlg.iconKey());
-		newInstance->setGroupInitial(newInstDlg.instGroup());
+		newInstance->setName(instName);
+		newInstance->setIconKey(instIcon);
+		newInstance->setGroupInitial(instGroup);
 		MMC->instances()->add(InstancePtr(newInstance));
 		stringToIntList(MMC->settings()->get("ShownNotifications").toString());
+		MMC->instances()->saveGroupList();
 		break;
 	}
 
@@ -814,6 +814,19 @@ void MainWindow::on_actionAddInstance_triggered()
 			   "one account added.\nPlease add your Mojang or Minecraft account."),
 			QMessageBox::Warning)->show();
 	}
+}
+
+void MainWindow::on_actionAddInstance_triggered()
+{
+	waitForMinecraftVersions();
+
+	NewInstanceDialog newInstDlg(this);
+	if (!newInstDlg.exec())
+		return;
+
+	MMC->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
+	createInstance(newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey(),
+				   newInstDlg.selectedVersion());
 }
 
 void MainWindow::on_actionCopyInstance_triggered()
@@ -1291,19 +1304,15 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 
 	QString launchScript;
 
-	if (!instance->prepareForLaunch(session, launchScript))
+	BaseProcess *proc = instance->prepareForLaunch(session);
+	if (!proc)
 		return;
-
-	MinecraftProcess *proc = new MinecraftProcess(instance);
-	proc->setLaunchScript(launchScript);
-	proc->setWorkdir(instance->minecraftRoot());
 
 	this->hide();
 
 	console = new ConsoleWindow(proc);
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
 
-	proc->setLogin(session);
 	proc->arm();
 
 	if (profiler)
@@ -1330,7 +1339,7 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 		{
 			dialog.accept();
 			QMessageBox msg;
-			msg.setText(tr("The launch of Minecraft itself is delayed until you press the "
+			msg.setText(tr("The game launch is delayed until you press the "
 						   "button. This is the right time to setup the profiler, as the "
 						   "profiler server is running now.\n\n%1").arg(message));
 			msg.setWindowTitle(tr("Waiting"));

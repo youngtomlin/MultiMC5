@@ -180,6 +180,9 @@ protected:
 
 	void setSelectedInstanceById(const QString &id);
 
+	void waitForMinecraftVersions();
+	void createInstance(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
+
 private:
 	Ui::MainWindow *ui;
 	class GroupView *view;
