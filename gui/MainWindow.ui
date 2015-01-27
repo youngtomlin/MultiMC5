@@ -61,6 +61,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAddInstance"/>
+   <addaction name="actionTechnicInstance"/>
    <addaction name="actionCopyInstance"/>
    <addaction name="separator"/>
    <addaction name="actionViewInstanceFolder"/>
@@ -493,6 +494,14 @@
    </property>
    <property name="toolTip">
     <string>Change the settings specific to the instance</string>
+   </property>
+  </action>
+  <action name="actionTechnicInstance">
+   <property name="icon">
+    <iconset theme="technic"/>
+   </property>
+   <property name="text">
+    <string>Create Technic Instance</string>
    </property>
   </action>
  </widget>

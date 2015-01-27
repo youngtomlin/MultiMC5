@@ -34,6 +34,8 @@
 #include "logic/ftb/LegacyFTBInstance.h"
 #include "logic/ftb/OneSixFTBInstance.h"
 #include "logic/ftb/FTBVersion.h"
+#include "logic/technic/SolderInstance.h"
+#include "logic/technic/SolderVersion.h"
 
 InstanceFactory InstanceFactory::loader;
 
@@ -51,7 +53,11 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(InstancePtr &inst,
 	QString inst_type = m_settings->get("InstanceType").toString();
 
 	// FIXME: replace with a map lookup, where instance classes register their types
-	if (inst_type == "OneSix" || inst_type == "Nostalgia")
+	if (inst_type == "Solder")
+	{
+		inst.reset(new SolderInstance(instDir, m_settings));
+	}
+	else if (inst_type == "OneSix" || inst_type == "Nostalgia")
 	{
 		inst.reset(new OneSixInstance(instDir, m_settings));
 	}
@@ -123,6 +129,17 @@ InstanceFactory::createInstance(InstancePtr &inst, BaseVersionPtr version, const
 			inst->setIntendedVersionId(mcversion->descriptor());
 			inst->init();
 		}
+		return InstanceFactory::NoCreateError;
+	}
+	SolderVersionPtr solderVersion = std::dynamic_pointer_cast<SolderVersion>(version);
+	if(solderVersion)
+	{
+		m_settings->set("InstanceType", "Solder");
+		auto solderPack = new SolderInstance(instDir, m_settings);
+
+		solderPack->setSolderVersion(solderVersion);
+		inst.reset(solderPack);
+		inst->init();
 		return InstanceFactory::NoCreateError;
 	}
 	delete m_settings;
