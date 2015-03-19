@@ -35,7 +35,7 @@
 #define IBUS "@im=ibus"
 
 // constructor
-MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst), m_censorProfile(0)
+MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
 {
 	connect(this, SIGNAL(finished(int, QProcess::ExitStatus)),
             SLOT(finish(int, QProcess::ExitStatus)));
@@ -134,7 +134,7 @@ QString MinecraftProcess::censorPrivateInfo(QString in)
 	if (!m_session)
 		return in;
     if (!m_censorProfile)
-        m_censorProfile = MMC->censorSettings()->makeProfile(m_session);
+        m_censorProfile.update(MMC->censorSettings()->makeProfile(m_session));
     return m_censorProfile->censorString(in);
 
 }

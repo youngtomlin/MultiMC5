@@ -57,7 +57,7 @@ public:
 
 	virtual ~MinecraftProcess()
 	{
-        delete m_censorProfile;
+
 	};
 	
 	/**
@@ -136,7 +136,7 @@ protected:
 	AuthSessionPtr m_session;
 	QString launchScript;
 	QString m_nativeFolder;
-    CensorProfile *m_censorProfile;
+    std::shared_ptr<CensorProfile> m_censorProfile;
 
 	bool preLaunch();
 	bool postLaunch();

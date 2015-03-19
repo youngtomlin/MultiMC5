@@ -20,6 +20,7 @@ public:
     void save();
     void reset();
 
+    // TODO: Change so it expects a map of strings. Then change AuthSession to give such a map
     CensorProfile* makeProfile(AuthSessionPtr session);
 
 private:

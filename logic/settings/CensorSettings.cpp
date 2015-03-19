@@ -25,7 +25,7 @@ void CensorSettings::load()
 
     QJsonObject data = Json::ensureObject(Json::ensureDocument(m_file));
 
-    int version = data.value("version").toInt();
+    int version = Json::ensureInteger(data.value("version"));
     if (version != 1)
     {
         qCritical() << QString("Censor Settings are stored in version %1 - Expected 1").arg(version);
@@ -39,12 +39,12 @@ void CensorSettings::load()
         {
             if (i.contains("id"))
             {
-                CensorEntry entry(i.value("id").toString(), i.value("replace").toString(), i.value("enabled").toBool(), true);
+                CensorEntry entry(Json::ensureString(i.value("id")), Json::ensureString(i.value("replace")), Json::ensureBoolean(i.value("enabled")), true);
                 m_censorEntries.append(entry);
             }
             else
             {
-                CensorEntry entry(i.value("search").toString(), i.value("replace").toString(), i.value("enabled").toBool(), false);
+                CensorEntry entry(Json::ensureString(i.value("search")), Json::ensureString(i.value("replace")), Json::ensureBoolean(i.value("enabled")), false);
                 m_censorEntries.append(entry);
             }
         }
