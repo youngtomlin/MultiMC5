@@ -35,10 +35,10 @@
 #define IBUS "@im=ibus"
 
 // constructor
-MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
+MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst), m_censorProfile(0)
 {
 	connect(this, SIGNAL(finished(int, QProcess::ExitStatus)),
-			SLOT(finish(int, QProcess::ExitStatus)));
+            SLOT(finish(int, QProcess::ExitStatus)));
 
 	// prepare the process environment
 	QProcessEnvironment rawenv = QProcessEnvironment::systemEnvironment();
@@ -116,7 +116,7 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
 				&MinecraftProcess::on_prepost_stdErr);
 		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardOutput, this,
 				&MinecraftProcess::on_prepost_stdOut);
-	}
+    }
 
 	// a process has been constructed for the instance. It is running from MultiMC POV
 	m_instance->setRunning(true);
@@ -133,22 +133,10 @@ QString MinecraftProcess::censorPrivateInfo(QString in)
 {
 	if (!m_session)
 		return in;
+    if (!m_censorProfile)
+        m_censorProfile = MMC->censorSettings()->makeProfile(m_session);
+    return m_censorProfile->censorString(in);
 
-	if (m_session->session != "-")
-		in.replace(m_session->session, "<SESSION ID>");
-	in.replace(m_session->access_token, "<ACCESS TOKEN>");
-	in.replace(m_session->client_token, "<CLIENT TOKEN>");
-	in.replace(m_session->uuid, "<PROFILE ID>");
-	in.replace(m_session->player_name, "<PROFILE NAME>");
-
-	auto i = m_session->u.properties.begin();
-	while (i != m_session->u.properties.end())
-	{
-		in.replace(i.value(), "<" + i.key().toUpper() + ">");
-		++i;
-	}
-
-	return in;
 }
 
 // console window

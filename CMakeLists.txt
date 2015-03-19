@@ -585,6 +585,10 @@ SET(MULTIMC_SOURCES
 	logic/settings/Setting.h
 	logic/settings/SettingsObject.cpp
 	logic/settings/SettingsObject.h
+        logic/settings/CensorSettings.cpp
+        logic/settings/CensorSettings.h
+	logic/settings/CensorProfile.cpp
+	logic/settings/CensorProfile.h
 
 	# Java related code
 	logic/java/JavaChecker.h
@@ -638,6 +642,13 @@ SET(MULTIMC_SOURCES
 	# Translations
 	logic/trans/TranslationDownloader.h
 	logic/trans/TranslationDownloader.cpp
+
+	# Json
+	logic/Json.cpp
+	logic/Json.h
+	logic/FileSystem.cpp
+	logic/FileSystem.h
+	logic/Exception.h
 )
 
 

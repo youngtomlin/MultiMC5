@@ -20,6 +20,7 @@
 #include <QProcess>
 #include <QString>
 #include "BaseInstance.h"
+#include "logic/settings/CensorProfile.h"
 
 /**
  * @brief the MessageLevel Enum
@@ -56,7 +57,7 @@ public:
 
 	virtual ~MinecraftProcess()
 	{
-		
+        delete m_censorProfile;
 	};
 	
 	/**
@@ -135,6 +136,7 @@ protected:
 	AuthSessionPtr m_session;
 	QString launchScript;
 	QString m_nativeFolder;
+    CensorProfile *m_censorProfile;
 
 	bool preLaunch();
 	bool postLaunch();
@@ -161,5 +163,5 @@ slots:
 private:
 	QString censorPrivateInfo(QString in);
 	MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel);
-	MessageLevel::Enum getLevel(const QString &levelName);
+    MessageLevel::Enum getLevel(const QString &levelName);
 };

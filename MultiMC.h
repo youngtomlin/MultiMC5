@@ -7,6 +7,8 @@
 #include <QFlag>
 #include <QIcon>
 
+#include "logic/settings/CensorSettings.h"
+
 class MinecraftVersionList;
 class LWJGLVersionList;
 class HttpMetaCache;
@@ -112,6 +114,8 @@ public:
 		return m_statusChecker;
 	}
 
+    std::shared_ptr<CensorSettings> censorSettings();
+
 	std::shared_ptr<LWJGLVersionList> lwjgllist();
 
 	std::shared_ptr<ForgeVersionList> forgelist();
@@ -209,6 +213,7 @@ private:
 	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
 	std::shared_ptr<JavaVersionList> m_javalist;
 	std::shared_ptr<TranslationDownloader> m_translationChecker;
+    std::shared_ptr<CensorSettings> m_censorSettings;
 
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;

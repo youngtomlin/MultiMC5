@@ -18,6 +18,7 @@
 #include "logic/LwjglVersionList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/liteloader/LiteLoaderVersionList.h"
+#include "logic/settings/CensorSettings.h"
 
 #include "logic/forge/ForgeVersionList.h"
 
@@ -540,6 +541,9 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting("SettingsGeometry", "");
 
 	m_settings->registerSetting("PagedGeometry", "");
+
+    m_censorSettings.reset(new CensorSettings(PathCombine(data(), "censorsettings.json")));
+    m_censorSettings->load();
 }
 
 void MultiMC::initHttpMetaCache()
@@ -742,7 +746,12 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 
 void MultiMC::setIconTheme(const QString& name)
 {
-	XdgIcon::setThemeName(name);
+    XdgIcon::setThemeName(name);
+}
+
+std::shared_ptr<CensorSettings> MultiMC::censorSettings()
+{
+    return m_censorSettings;
 }
 
 QIcon MultiMC::getThemedIcon(const QString& name)
