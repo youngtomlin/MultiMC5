@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "minecraft/MinecraftProcess.h"
+#include "minecraft/MinecraftLauncher.h"
 #include "BaseInstance.h"
 #include <java/JavaChecker.h>
 #include <MMCStrings.h>
@@ -34,19 +34,19 @@
 #define IBUS "@im=ibus"
 
 // constructor
-MinecraftProcess::MinecraftProcess(MinecraftInstancePtr inst) : BaseProcess(inst)
+MinecraftLauncher::MinecraftLauncher(MinecraftInstancePtr inst) : BaseLauncher(inst)
 {
 }
 
-MinecraftProcess* MinecraftProcess::create(MinecraftInstancePtr inst)
+MinecraftLauncher* MinecraftLauncher::create(MinecraftInstancePtr inst)
 {
-	auto proc = new MinecraftProcess(inst);
+	auto proc = new MinecraftLauncher(inst);
 	proc->init();
 	return proc;
 }
 
 
-QString MinecraftProcess::censorPrivateInfo(QString in)
+QString MinecraftLauncher::censorPrivateInfo(QString in)
 {
 	if (!m_session)
 		return in;
@@ -69,7 +69,7 @@ QString MinecraftProcess::censorPrivateInfo(QString in)
 }
 
 // console window
-MessageLevel::Enum MinecraftProcess::guessLevel(const QString &line, MessageLevel::Enum level)
+MessageLevel::Enum MinecraftLauncher::guessLevel(const QString &line, MessageLevel::Enum level)
 {
 	QRegularExpression re("\\[(?<timestamp>[0-9:]+)\\] \\[[^/]+/(?<level>[^\\]]+)\\]");
 	auto match = re.match(line);
@@ -109,7 +109,7 @@ MessageLevel::Enum MinecraftProcess::guessLevel(const QString &line, MessageLeve
 	return level;
 }
 
-QMap<QString, QString> MinecraftProcess::getVariables() const
+QMap<QString, QString> MinecraftLauncher::getVariables() const
 {
 	auto mcInstance = std::dynamic_pointer_cast<MinecraftInstance>(m_instance);
 	QMap<QString, QString> out;
@@ -122,7 +122,7 @@ QMap<QString, QString> MinecraftProcess::getVariables() const
 	return out;
 }
 
-QStringList MinecraftProcess::javaArguments() const
+QStringList MinecraftLauncher::javaArguments() const
 {
 	QStringList args;
 
@@ -163,10 +163,10 @@ QStringList MinecraftProcess::javaArguments() const
 	return args;
 }
 
-void MinecraftProcess::arm()
+void MinecraftLauncher::arm()
 {
 	printHeader();
-	emit log("Minecraft folder is:\n" + workingDirectory() + "\n\n");
+	emit log("Minecraft folder is:\n" + m_process.workingDirectory() + "\n\n");
 
 	if (!preLaunch())
 	{
@@ -252,14 +252,15 @@ void MinecraftProcess::arm()
 		}
 		emit log("Wrapper command is:\n" + wrapperCommand + "\n\n");
 		args.prepend(JavaPath);
-		start(wrapperCommand, args);
+		m_process.start(wrapperCommand, args);
 	}
 	else
 	{
-		start(JavaPath, args);
+		m_process.start(JavaPath, args);
 	}
 
-	if (!waitForStarted())
+	// instantiate the launcher part
+	if (!m_process.waitForStarted())
 	{
 		//: Error message displayed if instace can't start
 		emit log(tr("Could not launch minecraft!"), MessageLevel::Error);
@@ -270,23 +271,20 @@ void MinecraftProcess::arm()
 		return;
 	}
 
-	emit log(tr("Minecraft process ID: %1\n\n").arg(processId()), MessageLevel::MultiMC);
+	emit log(tr("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::MultiMC);
 
 	// send the launch script to the launcher part
-	QByteArray bytes = launchScript.toUtf8();
-	writeData(bytes.constData(), bytes.length());
+	m_process.write(launchScript.toUtf8());
 }
 
-void MinecraftProcess::launch()
+void MinecraftLauncher::launch()
 {
 	QString launchString("launch\n");
-	QByteArray bytes = launchString.toUtf8();
-	writeData(bytes.constData(), bytes.length());
+	m_process.write(launchString.toUtf8());
 }
 
-void MinecraftProcess::abort()
+void MinecraftLauncher::abort()
 {
 	QString launchString("abort\n");
-	QByteArray bytes = launchString.toUtf8();
-	writeData(bytes.constData(), bytes.length());
+	m_process.write(launchString.toUtf8());
 }
