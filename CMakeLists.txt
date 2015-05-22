@@ -127,6 +127,8 @@ include(Coverity)
 
 ############################### Built Artifacts ###############################
 
+include(Format)
+
 add_subdirectory(tests)
 
 add_subdirectory(logic)

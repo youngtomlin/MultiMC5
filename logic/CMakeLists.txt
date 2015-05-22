@@ -250,6 +250,9 @@ SET(LOGIC_SOURCES
 	tools/MCEditTool.h
 
 )
+
+Format(Logic ${LOGIC_SOURCES})
+
 ################################ COMPILE ################################
 
 # Add common library
