@@ -15,7 +15,7 @@
 
 #include "Env.h"
 #include "ForgeXzDownload.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 #include <QCryptographicHash>
 #include <QFileInfo>
@@ -185,8 +185,8 @@ void ForgeXzDownload::downloadReadyRead()
 	m_pack200_xz_file.write(m_reply->readAll());
 }
 
-#include "xz.h"
-#include "unpack200.h"
+#include "xz/xz.h"
+#include "pack200/unpack200.h"
 #include <stdexcept>
 
 const size_t buffer_size = 8196;

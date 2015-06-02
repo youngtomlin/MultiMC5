@@ -15,7 +15,7 @@
 #include <QDesktopServices>
 #include <QKeyEvent>
 
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <MultiMC.h>
 
 #include "dialogs/ProgressDialog.h"

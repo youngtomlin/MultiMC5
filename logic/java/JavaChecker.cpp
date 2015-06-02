@@ -1,6 +1,6 @@
 #include "JavaChecker.h"
-#include <pathutils.h>
-#include <cmdutils.h>
+#include <mmc_utils/pathutils.h>
+#include <mmc_utils/cmdutils.h>
 #include <QFile>
 #include <QProcess>
 #include <QMap>

@@ -14,7 +14,7 @@
  */
 
 #include "JavaCheckerJob.h"
-#include "pathutils.h"
+#include <mmc_utils/pathutils.h>
 
 #include <QDebug>
 

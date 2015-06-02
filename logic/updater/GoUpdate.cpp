@@ -1,5 +1,5 @@
 #include "GoUpdate.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <QDebug>
 #include <QDomDocument>
 #include <QFile>
@@ -23,7 +23,6 @@ bool parseVersionInfo(const QByteArray &data, VersionFileList &list, QString &er
 
 	QJsonObject json = jsonDoc.object();
 
-	qDebug() << data;
 	qDebug() << "Loading version info from JSON.";
 	QJsonArray filesArray = json.value("Files").toArray();
 	for (QJsonValue fileValue : filesArray)

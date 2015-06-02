@@ -17,8 +17,8 @@
 #include <QDir>
 #include <QImage>
 #include <settings/Setting.h>
-#include <pathutils.h>
-#include <cmdutils.h>
+#include <mmc_utils/pathutils.h>
+#include <mmc_utils/cmdutils.h>
 
 #include "LegacyInstance.h"
 

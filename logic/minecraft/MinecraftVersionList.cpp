@@ -28,7 +28,7 @@
 #include "ProfileUtils.h"
 #include "VersionFilterData.h"
 
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 static const char * localVersionCache = "versions/versions.dat";
 

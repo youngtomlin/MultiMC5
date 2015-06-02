@@ -22,7 +22,7 @@
 #include <QDesktopServices>
 #include <QAbstractItemModel>
 
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"

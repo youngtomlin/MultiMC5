@@ -20,6 +20,14 @@ CMakeLists.txt.user.*
 build
 /build-*
 
+# Biicode related
+bin/
+bii/deps
+bii/build
+bii/lib
+bii/cmake
+bii/.hive.db
+
 # Ctags File
 tags
 

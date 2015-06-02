@@ -17,7 +17,7 @@
 #include <QDir>
 #include <QJsonDocument>
 #include <QJsonArray>
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 #include "minecraft/MinecraftProfile.h"
 #include "ProfileUtils.h"

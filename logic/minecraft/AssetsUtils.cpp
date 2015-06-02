@@ -23,7 +23,7 @@
 #include <QDebug>
 
 #include "AssetsUtils.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 namespace AssetsUtils
 {

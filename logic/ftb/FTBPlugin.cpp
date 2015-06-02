@@ -7,8 +7,8 @@
 #include <InstanceList.h>
 #include <minecraft/MinecraftVersionList.h>
 #include <settings/INISettingsObject.h>
-#include <pathutils.h>
-#include "QDebug"
+#include <mmc_utils/pathutils.h>
+#include <QDebug>
 #include <QXmlStreamReader>
 #include <QRegularExpression>
 

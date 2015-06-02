@@ -27,7 +27,7 @@
 #include <QDebug>
 
 #include "auth/MojangAccount.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 #define ACCOUNT_LIST_FORMAT_VERSION 2
 

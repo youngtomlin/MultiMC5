@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <auth/flows/AuthenticateTask.h>
+#include "auth/flows/AuthenticateTask.h"
 
-#include <auth/MojangAccount.h>
+#include "auth/MojangAccount.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>

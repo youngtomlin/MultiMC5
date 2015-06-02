@@ -33,9 +33,9 @@
 #include "tools/JVisualVM.h"
 #include "tools/MCEditTool.h"
 
-#include "pathutils.h"
-#include "cmdutils.h"
-#include <xdgicon.h>
+#include <mmc_utils/pathutils.h>
+#include <mmc_utils/cmdutils.h>
+#include "iconfix/xdgicon.h"
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
 

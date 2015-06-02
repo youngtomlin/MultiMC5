@@ -19,7 +19,7 @@
 #include <QStringList>
 
 #include <settings/Setting.h>
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 #include <QDebug>
 #include "java/JavaUtils.h"

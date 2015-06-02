@@ -22,8 +22,8 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QDataStream>
-#include <pathutils.h>
-#include <JlCompress.h>
+#include <mmc_utils/pathutils.h>
+#include <quazip/JlCompress.h>
 
 #include "BaseInstance.h"
 #include "minecraft/MinecraftVersionList.h"

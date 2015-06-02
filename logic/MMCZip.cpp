@@ -23,9 +23,9 @@ Original ZIP package is copyrighted by Gilles Vollant and contributors,
 see quazip/(un)MMCZip.h files for details. Basically it's the zlib license.
 */
 
-#include <pathutils.h>
-#include <quazip.h>
-#include <JlCompress.h>
+#include <mmc_utils/pathutils.h>
+#include <quazip/quazip.h>
+#include <quazip/JlCompress.h>
 #include "MMCZip.h"
 
 #include <QDebug>

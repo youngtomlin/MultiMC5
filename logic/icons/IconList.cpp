@@ -14,7 +14,7 @@
  */
 
 #include "IconList.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <QMap>
 #include <QEventLoop>
 #include <QMimeData>

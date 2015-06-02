@@ -18,7 +18,7 @@
 #include <QStringList>
 #include <QWidget>
 
-#include <osutils.h>
+#include <mmc_utils/osutils.h>
 #include "JavaCheckerJob.h"
 #include "JavaChecker.h"
 #include "JavaVersionList.h"

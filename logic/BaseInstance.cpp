@@ -22,8 +22,8 @@
 #include "settings/Setting.h"
 #include "settings/OverrideSetting.h"
 
-#include "pathutils.h"
-#include <cmdutils.h>
+#include <mmc_utils/pathutils.h>
+#include <mmc_utils/cmdutils.h>
 #include "minecraft/MinecraftVersionList.h"
 #include "icons/IconList.h"
 

@@ -3,7 +3,7 @@
 #include "ftb/OneSixFTBInstance.h"
 #include "minecraft/MinecraftVersionList.h"
 
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <QDir>
 #include <QUuid>
 #include <QJsonDocument>

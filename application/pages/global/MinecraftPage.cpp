@@ -19,7 +19,7 @@
 #include <QMessageBox>
 #include <QDir>
 
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 #include "Platform.h"
 

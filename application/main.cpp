@@ -1,6 +1,9 @@
 #include "MultiMC.h"
 #include "MainWindow.h"
 
+// stupid hack to make biicode include the updater
+#include "MMCUpdater.h"
+
 int main_gui(MultiMC &app)
 {
 	// show main window

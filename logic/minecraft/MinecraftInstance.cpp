@@ -1,7 +1,7 @@
 #include "MinecraftInstance.h"
 #include <settings/Setting.h>
 #include "settings/SettingsObject.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include "Env.h"
 #include "minecraft/MinecraftVersionList.h"
 

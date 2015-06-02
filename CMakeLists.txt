@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.0)
 
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
-if(IS_IN_SOURCE_BUILD)
-	message(AUTHOR_WARNING "You are building MultiMC in-source. This is NOT recommended!")
+if(NOT BIICODE)
+	message(FATAL "You need to use bii for building MultiMC. Get it here: http://www.biicode.com/")
 endif()
 
 if(WIN32)
@@ -10,16 +9,16 @@ if(WIN32)
 	cmake_policy(SET CMP0020 OLD)
 endif()
 
-project(Megatron)
-enable_testing()
 
 ######## Set CMake options ########
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 ######## Set module path ########
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
-set(MMC_SRC "${PROJECT_SOURCE_DIR}")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/;${CMAKE_MODULE_PATH}")
+set(MMC_SRC "${CMAKE_CURRENT_SOURCE_DIR}")
 set(MMC_BIN "${PROJECT_BINARY_DIR}")
 
 # Output all executables and shared libs in the main build folder, not in subfolders.
@@ -43,12 +42,7 @@ include(Coverity)
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Test REQUIRED)
-find_package(Qt5Xml REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml X11Extras)
 
 include_directories(
 	${Qt5Core_INCLUDE_DIRS}
@@ -74,67 +68,35 @@ endif()
 
 ################################ Included Libs ################################
 
-include(ExternalProject)
-set_directory_properties(PROPERTIES EP_BASE External)
-
-# Add quazip
-add_definitions(-DQUAZIP_STATIC)
-set(QUAZIP_VERSION "0.7.1")
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/quazip-${QUAZIP_VERSION}.tar.gz)
-	file(DOWNLOAD http://downloads.sourceforge.net/project/quazip/quazip/${QUAZIP_VERSION}/quazip-${QUAZIP_VERSION}.tar.gz ${CMAKE_BINARY_DIR}/quazip-${QUAZIP_VERSION}.tar.gz)
-endif()
-ExternalProject_Add(QuaZIP
-	SOURCE_DIR <BINARY_DIR>/../Source/quazip-${QUAZIP_VERSION}
-	DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/.. ${CMAKE_COMMAND} -E tar xzf ${CMAKE_BINARY_DIR}/quazip-${QUAZIP_VERSION}.tar.gz
-	PATCH_COMMAND patch -p0 -i ${CMAKE_SOURCE_DIR}/quazip.patch
-	CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG} -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-)
-include_directories("${CMAKE_BINARY_DIR}/External/Install/QuaZIP/include/quazip")
-if(UNIX)
-set(QUAZIP_LIBRARIES -L"${CMAKE_BINARY_DIR}/External/Install/QuaZIP/lib" quazip z)
-else()
-set(QUAZIP_LIBRARIES -L"${CMAKE_BINARY_DIR}/External/Install/QuaZIP/lib" quazip)
-endif()
-
-# Add the markdown parser thing
-add_subdirectory(depends/hoedown)
-include_directories(${HOEDOWN_INCLUDE_DIR})
-
 # Add the java launcher and checker
 add_subdirectory(depends/launcher)
 add_subdirectory(depends/javacheck)
-
-# Add xz decompression
-add_subdirectory(depends/xz-embedded)
-include_directories(${XZ_INCLUDE_DIR})
-
-# Add pack200 decompression
-add_subdirectory(depends/pack200)
-include_directories(${PACK200_INCLUDE_DIR})
-
-######## MultiMC Libs ########
-
-# Add the util library.
-add_definitions(-DLIBUTIL_STATIC)
-add_subdirectory(depends/util)
-include_directories(${LIBUTIL_INCLUDE_DIR})
-
-# Add the GUI -> Logic connection header
-add_subdirectory(depends/LogicalGui)
-include_directories(${LOGICALGUI_INCLUDE_DIR})
-
-# Add the GUI -> Logic connection header
-add_subdirectory(depends/iconfix)
-include_directories(${ICONFIX_INCLUDE_DIR})
 
 include(Coverity)
 
 ############################### Built Artifacts ###############################
 
 add_subdirectory(tests)
-
+add_subdirectory(application)
 add_subdirectory(logic)
 
-add_subdirectory(application)
+set(BII_LIB_SRC ${MultiMC_LOGIC_SRC})
+list(APPEND BII_LIB_DEPS Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent ${MultiMC_LINK_ADDITIONAL_LIBS})
+set(BII_LIB_TYPE SHARED)
+set(BII_application_main_SRC ${MultiMC_APPLICATION_SRC})
+list(REMOVE_ITEM BII_BLOCK_TESTS application_main)
+set(BII_tests_tst_DownloadTask_SRC tests/tst_DownloadTask.cpp)
+set(BII_tests_tst_UpdateChecker_SRC tests/tst_UpdateChecker.cpp)
 
-add_subdirectory(mmc_updater)
+add_bii_targets()
+
+target_include_directories(${BII_application_main_TARGET} PRIVATE "${MMC_SRC}/application")
+
+set_target_properties(${BII_application_main_TARGET} PROPERTIES OUTPUT_NAME "MultiMC")
+
+foreach(target ${BII_BLOCK_TARGETS})
+	if("${target}" MATCHES "_tests_")
+		target_link_libraries(${target} PRIVATE Qt5::Test ${BII_LIB_DEPS})
+		target_include_directories(${target} PRIVATE ${CMAKE_BINARY_DIR})
+	endif()
+endforeach()

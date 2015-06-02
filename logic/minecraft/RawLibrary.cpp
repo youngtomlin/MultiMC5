@@ -2,7 +2,7 @@
 using namespace MMCJson;
 
 #include "RawLibrary.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &filename)
 {

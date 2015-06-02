@@ -15,7 +15,7 @@
 
 #include "Env.h"
 #include "MD5EtagDownload.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <QCryptographicHash>
 #include <QDebug>
 

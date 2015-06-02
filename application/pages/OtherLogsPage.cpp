@@ -20,7 +20,7 @@
 
 #include "GuiUtil.h"
 #include "RecursiveFileSystemWatcher.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 OtherLogsPage::OtherLogsPage(QString path, QWidget *parent)
 	: QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path),

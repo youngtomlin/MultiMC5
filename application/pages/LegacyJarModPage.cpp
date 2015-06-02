@@ -19,7 +19,7 @@
 #include <QKeyEvent>
 #include <QKeyEvent>
 
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 #include "dialogs/VersionSelectDialog.h"
 #include "dialogs/ProgressDialog.h"

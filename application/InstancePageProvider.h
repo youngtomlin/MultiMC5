@@ -12,8 +12,7 @@
 #include "pages/OtherLogsPage.h"
 #include "pages/BasePageProvider.h"
 #include "pages/LegacyJarModPage.h"
-#include <pathutils.h>
-
+#include <mmc_utils/pathutils.h>
 
 class InstancePageProvider : public QObject, public BasePageProvider
 {

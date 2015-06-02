@@ -4,7 +4,7 @@
 #include "minecraft/MinecraftVersionList.h"
 #include "Env.h"
 
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <QDir>
 #include <QUuid>
 #include <QJsonDocument>

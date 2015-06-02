@@ -21,7 +21,7 @@
 #include <QMessageBox>
 #include <QDir>
 
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 #include "dialogs/VersionSelectDialog.h"
 #include <ColumnResizer.h>

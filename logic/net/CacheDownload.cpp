@@ -14,7 +14,7 @@
  */
 
 #include "CacheDownload.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 
 #include <QCryptographicHash>
 #include <QFileInfo>

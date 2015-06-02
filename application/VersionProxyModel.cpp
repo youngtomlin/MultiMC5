@@ -2,7 +2,7 @@
 #include "MultiMC.h"
 #include <QSortFilterProxyModel>
 #include <QPixmapCache>
-#include <modutils.h>
+#include <mmc_utils/modutils.h>
 
 class VersionFilterModel : public QSortFilterProxyModel
 {

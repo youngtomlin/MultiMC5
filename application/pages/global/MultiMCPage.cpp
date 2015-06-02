@@ -21,7 +21,7 @@
 #include <QDir>
 #include <QTextCharFormat>
 
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <ColumnResizer.h>
 #include "updater/UpdateChecker.h"
 

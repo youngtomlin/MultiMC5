@@ -14,7 +14,7 @@
  */
 
 #include <QIcon>
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <QDebug>
 #include "MMCError.h"
 

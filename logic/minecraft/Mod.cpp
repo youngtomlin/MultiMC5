@@ -19,11 +19,11 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonValue>
-#include <quazip.h>
-#include <quazipfile.h>
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
 
 #include "Mod.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include "settings/INIFile.h"
 #include <QDebug>
 

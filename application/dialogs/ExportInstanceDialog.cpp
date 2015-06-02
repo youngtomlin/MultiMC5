@@ -17,7 +17,7 @@
 #include "ui_ExportInstanceDialog.h"
 #include <BaseInstance.h>
 #include <MMCZip.h>
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <qfilesystemmodel.h>

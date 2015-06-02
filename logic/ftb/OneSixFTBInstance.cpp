@@ -7,7 +7,7 @@
 #include "forge/ForgeInstaller.h"
 #include "forge/ForgeVersionList.h"
 #include <settings/INISettingsObject.h>
-#include "pathutils.h"
+#include <mmc_utils/pathutils.h>
 
 OneSixFTBInstance::OneSixFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir) :
 	OneSixInstance(globalSettings, settings, rootDir)

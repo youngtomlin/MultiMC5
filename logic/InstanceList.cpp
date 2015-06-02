@@ -24,7 +24,7 @@
 #include <QJsonArray>
 #include <QXmlStreamReader>
 #include <QRegularExpression>
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <QDebug>
 
 #include "InstanceList.h"

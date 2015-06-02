@@ -27,9 +27,9 @@
 #include <QStandardPaths>
 #include <QCoreApplication>
 
-#include "osutils.h"
-#include "pathutils.h"
-#include "cmdutils.h"
+#include <mmc_utils/osutils.h>
+#include <mmc_utils/pathutils.h>
+#include <mmc_utils/cmdutils.h>
 
 #define IBUS "@im=ibus"
 

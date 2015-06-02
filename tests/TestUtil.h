@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include <QTest>
 #include <QDir>
+#include <QUrl>
 
 #include "test_config.h"
 
@@ -12,7 +13,8 @@ class TestsInternal
 public:
 	static QByteArray readFile(const QString &fileName)
 	{
-		QFile f(fileName);
+		const QUrl url(fileName);
+		QFile f(url.isLocalFile() ? url.toLocalFile() : fileName);
 		f.open(QFile::ReadOnly);
 		return f.readAll();
 	}

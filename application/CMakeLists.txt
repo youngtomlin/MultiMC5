@@ -134,7 +134,6 @@ SET(MULTIMC_SOURCES
 	MultiMC.h
 	MultiMC.cpp
 	BuildConfig.h
-	${PROJECT_BINARY_DIR}/BuildConfig.cpp
 
 	# GUI - general utilities
 	GuiUtil.h
@@ -331,24 +330,17 @@ else()
 	list(APPEND MULTIMC_SOURCES Platform_Other.cpp)
 endif()
 
-
 # Link additional libraries
 if(WIN32)
 	set(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} Qt5::WinMain)
 endif(WIN32)
 
-include_directories(../logic)
-
-# Qt 5 stuff
-qt5_wrap_ui(MULTIMC_UI ${MULTIMC_UIS})
-qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
-
-# Add executable
-add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES} ${MULTIMC_RCS})
-target_link_libraries(MultiMC MultiMC_logic xz-embedded unpack200 iconfix libUtil LogicalGui
-	${QUAZIP_LIBRARIES} Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent
-	hoedown
-		${MultiMC_LINK_ADDITIONAL_LIBS})
+set(srcs MACOSX_BUNDLE WIN32 ${PROJECT_BINARY_DIR}/BuildConfig.cpp)
+foreach(file ${MULTIMC_SOURCES} ${MULTIMC_UIS} ${MULTIMC_QRCS} ${MULTIMC_RCS})
+	list(APPEND srcs "${MMC_SRC}/application/${file}")
+endforeach()
+set(MultiMC_APPLICATION_SRC ${srcs} PARENT_SCOPE)
+set(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} PARENT_SCOPE)
 
 ################################ INSTALLATION AND PACKAGING ################################
 
@@ -356,20 +348,20 @@ target_link_libraries(MultiMC MultiMC_logic xz-embedded unpack200 iconfix libUti
 
 #### Executable ####
 if(APPLE AND UNIX) ## OSX
-	install(TARGETS MultiMC
+	install(TARGETS ${BII_application_main_TARGET}
 		BUNDLE DESTINATION . COMPONENT Runtime
 		RUNTIME DESTINATION MultiMC.app/Contents/MacOS COMPONENT Runtime
 	)
 
 elseif(UNIX) ## LINUX and similar
-	install(TARGETS MultiMC
+	install(TARGETS ${BII_application_main_TARGET}
 		BUNDLE DESTINATION . COMPONENT Runtime
 		RUNTIME DESTINATION bin COMPONENT Runtime
 	)
 	install(PROGRAMS package/linux/MultiMC DESTINATION .)
 
 elseif(WIN32) ## WINDOWS
-	install(TARGETS MultiMC
+	install(TARGETS ${BII_application_main_TARGET}
 		BUNDLE DESTINATION . COMPONENT Runtime
 		LIBRARY DESTINATION . COMPONENT Runtime
 		RUNTIME DESTINATION . COMPONENT Runtime

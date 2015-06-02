@@ -23,9 +23,9 @@
 #include "minecraft/VersionFilterData.h"
 #include "Env.h"
 
-#include <quazip.h>
-#include <quazipfile.h>
-#include <pathutils.h>
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
+#include <mmc_utils/pathutils.h>
 #include <QStringList>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>

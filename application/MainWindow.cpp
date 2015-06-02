@@ -324,9 +324,9 @@ namespace Ui {
 
 #include <MMCZip.h>
 
-#include "osutils.h"
-#include "userutils.h"
-#include "pathutils.h"
+#include <mmc_utils/osutils.h>
+#include <mmc_utils/userutils.h>
+#include <mmc_utils/pathutils.h>
 
 #include "groupview/GroupView.h"
 #include "groupview/InstanceDelegate.h"

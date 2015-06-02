@@ -14,9 +14,9 @@
  */
 
 #include <QStringList>
-#include <pathutils.h>
-#include <quazip.h>
-#include <quazipfile.h>
+#include <mmc_utils/pathutils.h>
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
 #include <QDebug>
 
 #include "Env.h"

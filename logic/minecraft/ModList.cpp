@@ -14,7 +14,7 @@
  */
 
 #include "ModList.h"
-#include <pathutils.h>
+#include <mmc_utils/pathutils.h>
 #include <QMimeData>
 #include <QUrl>
 #include <QUuid>

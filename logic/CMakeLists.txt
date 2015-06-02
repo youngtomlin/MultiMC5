@@ -1,6 +1,4 @@
-project(MultiMC-Logic)
-
-SET(LOGIC_SOURCES
+set(LOGIC_SOURCES
 	# LOGIC - Base classes and infrastructure
 	BaseInstaller.h
 	BaseInstaller.cpp
@@ -248,16 +246,10 @@ SET(LOGIC_SOURCES
 	tools/JVisualVM.h
 	tools/MCEditTool.cpp
 	tools/MCEditTool.h
-
 )
-################################ COMPILE ################################
 
-# Add common library
-add_library(MultiMC_logic STATIC ${LOGIC_SOURCES})
-
-# Link
-target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix libUtil LogicalGui ${QUAZIP_LIBRARIES}
-	Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent
-		${MultiMC_LINK_ADDITIONAL_LIBS})
-
-add_dependencies(MultiMC_logic QuaZIP)
+set(srcs )
+foreach(file ${LOGIC_SOURCES})
+	list(APPEND srcs "${MMC_SRC}/logic/${file}")
+endforeach()
+set(MultiMC_LOGIC_SRC ${srcs} PARENT_SCOPE)
