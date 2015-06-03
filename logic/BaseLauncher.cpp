@@ -168,7 +168,7 @@ void BaseLauncher::preLaunch()
 	}
 	else
 	{
-		launch();
+		on_pre_state(LoggedProcess::Skipped);
 	}
 }
 
@@ -193,6 +193,7 @@ void BaseLauncher::on_pre_state(LoggedProcess::State state)
 			emit log(tr("Pre-Launch command ran successfully.\n\n"));
 			m_instance->reload();
 		}
+		case LoggedProcess::Skipped:
 		default:
 			break;
 	}
@@ -219,6 +220,8 @@ void BaseLauncher::on_state(LoggedProcess::State state)
 			m_instance->setRunning(false);
 			emit ended(m_instance, exitCode, estat);
 		}
+		case LoggedProcess::Skipped:
+			qWarning() << "Illegal game state: Skipped";
 		default:
 			break;
 	}
@@ -232,6 +235,7 @@ void BaseLauncher::on_post_state(LoggedProcess::State state)
 		case LoggedProcess::Crashed:
 		case LoggedProcess::FailedToStart:
 		case LoggedProcess::Finished:
+		case LoggedProcess::Skipped:
 		{
 
 		}
@@ -259,7 +263,7 @@ void BaseLauncher::killProcess()
 
 void BaseLauncher::postLaunch()
 {
-	QString postlaunch_cmd = m_instance->settings().get("PostExitCommand").toString();
+	QString postlaunch_cmd = m_instance->settings()->get("PostExitCommand").toString();
 	if (!postlaunch_cmd.isEmpty())
 	{
 		postlaunch_cmd = substituteVariables(postlaunch_cmd);

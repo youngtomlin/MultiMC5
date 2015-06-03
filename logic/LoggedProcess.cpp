@@ -1,23 +1,25 @@
 #include "LoggedProcess.h"
 #include "MessageLevel.h"
+#include <QDebug>
 
 LoggedProcess::LoggedProcess(QObject *parent) : QProcess(parent)
 {
 	// QProcess has a strange interface... let's map a lot of those into a few.
-	connect(&QProcess::readyReadStandardOutput, &LoggedProcess::on_stdOut);
-	connect(&QProcess::readyReadStandardOutput, &LoggedProcess::on_stdOut);
+	connect(this, &QProcess::readyReadStandardOutput, this, &LoggedProcess::on_stdOut);
+	connect(this, &QProcess::readyReadStandardError, this, &LoggedProcess::on_stdErr);
 	connect(this, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(on_exit(int,QProcess::ExitStatus)));
-	connect(&QProcess::error, &LoggedProcess::on_error);
-	connect(&QProcess::stateChanged, &LoggedProcess::on_stateChange);
+	connect(this, SIGNAL(error(QProcess::ProcessError)), this, SLOT(on_error(QProcess::ProcessError)));
+	connect(this, &QProcess::stateChanged, this, &LoggedProcess::on_stateChange);
 }
 
-QStringList && reprocess(QByteArray & data, QString & leftover)
+QStringList reprocess(const QByteArray & data, QString & leftover)
 {
 	QString str = leftover + QString::fromLocal8Bit(data);
 
 	str.remove('\r');
 	QStringList lines = str.split("\n");
 	leftover = lines.takeLast();
+	return lines;
 }
 
 void LoggedProcess::on_stdErr()
@@ -37,12 +39,12 @@ void LoggedProcess::on_exit(int exit_code, QProcess::ExitStatus status)
 	// Flush console window
 	if (!m_err_leftover.isEmpty())
 	{
-		emit log(m_err_leftover, MessageLevel::StdErr);
+		emit log({m_err_leftover}, MessageLevel::StdErr);
 		m_err_leftover.clear();
 	}
 	if (!m_out_leftover.isEmpty())
 	{
-		emit log(m_err_leftover, MessageLevel::StdOut);
+		emit log({m_err_leftover}, MessageLevel::StdOut);
 		m_out_leftover.clear();
 	}
 
@@ -52,23 +54,23 @@ void LoggedProcess::on_exit(int exit_code, QProcess::ExitStatus status)
 		if (status == QProcess::NormalExit)
 		{
 			//: Message displayed on instance exit
-			emit log(tr("Process exited with code %1.").arg(exit_code));
+			emit log({tr("Process exited with code %1.").arg(exit_code)}, MessageLevel::MultiMC);
 			changeState(LoggedProcess::Finished);
 		}
 		else
 		{
 			//: Message displayed on instance crashed
 			if(exit_code == -1)
-				emit log(tr("Process crashed.").arg(exit_code));
+				emit log({tr("Process crashed.").arg(exit_code)}, MessageLevel::MultiMC);
 			else
-				emit log(tr("Process crashed with exitcode %1.").arg(exit_code));
+				emit log({tr("Process crashed with exitcode %1.").arg(exit_code)}, MessageLevel::MultiMC);
 			changeState(LoggedProcess::Crashed);
 		}
 	}
 	else
 	{
 		//: Message displayed after the instance exits due to kill request
-		emit log(tr("Process was killed by user."), MessageLevel::Error);
+		emit log({tr("Process was killed by user.")}, MessageLevel::Error);
 		changeState(LoggedProcess::Aborted);
 	}
 }
@@ -79,7 +81,7 @@ void LoggedProcess::on_error(QProcess::ProcessError error)
 	{
 		case QProcess::FailedToStart:
 		{
-			emit log(tr("The process failed to start."), MessageLevel::Fatal);
+			emit log({tr("The process failed to start.")}, MessageLevel::Fatal);
 			changeState(LoggedProcess::FailedToStart);
 			break;
 		}
@@ -99,9 +101,9 @@ void LoggedProcess::kill()
 	QProcess::kill();
 }
 
-int LoggedProcess::exitCode()
+int LoggedProcess::exitCode() const
 {
-	returm m_exit_code;
+	return m_exit_code;
 }
 
 void LoggedProcess::changeState(LoggedProcess::State state)
@@ -112,14 +114,9 @@ void LoggedProcess::changeState(LoggedProcess::State state)
 	emit stateChanged(m_state);
 }
 
-LoggedProcess::State LoggedProcess::state()
+LoggedProcess::State LoggedProcess::state() const
 {
 	return m_state;
-}
-
-bool LoggedProcess::isPeacefulState(LoggedProcess::State state)
-{
-	
 }
 
 void LoggedProcess::on_stateChange(QProcess::ProcessState state)

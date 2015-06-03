@@ -8,6 +8,10 @@ SET(LOGIC_SOURCES
 	BaseVersionList.cpp
 	InstanceList.h
 	InstanceList.cpp
+	LoggedProcess.h
+	LoggedProcess.cpp
+	MessageLevel.cpp
+	MessageLevel.h
 	BaseVersion.h
 	BaseLauncher.h
 	BaseLauncher.cpp

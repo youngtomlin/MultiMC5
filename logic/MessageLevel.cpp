@@ -30,5 +30,7 @@ MessageLevel::Enum MessageLevel::fromLine(QString &line)
 	{
 		auto level = MessageLevel::getLevel(line.left(endmark).mid(3));
 		line = line.mid(endmark + 2);
+		return level;
 	}
+	return MessageLevel::Unknown;
 }

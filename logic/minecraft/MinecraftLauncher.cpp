@@ -163,22 +163,8 @@ QStringList MinecraftLauncher::javaArguments() const
 	return args;
 }
 
-void MinecraftLauncher::arm()
+bool MinecraftLauncher::checkJava(QString JavaPath)
 {
-	printHeader();
-	emit log("Minecraft folder is:\n" + m_process.workingDirectory() + "\n\n");
-
-	if (!preLaunch())
-	{
-		emit ended(m_instance, 1, QProcess::CrashExit);
-		return;
-	}
-
-	m_instance->setLastLaunch();
-
-	QString JavaPath = m_instance->settings()->get("JavaPath").toString();
-	emit log("Java path is:\n" + JavaPath + "\n\n");
-
 	auto realJavaPath = QStandardPaths::findExecutable(JavaPath);
 	if (realJavaPath.isEmpty())
 	{
@@ -187,51 +173,73 @@ void MinecraftLauncher::arm()
 				 MessageLevel::Warning);
 	}
 
-	// check java version here.
+	QFileInfo javaInfo(realJavaPath);
+	qlonglong javaUnixTime = javaInfo.lastModified().toMSecsSinceEpoch();
+	auto storedUnixTime = m_instance->settings()->get("JavaTimestamp").toLongLong();
+	// if they are not the same, check!
+	if(javaUnixTime != storedUnixTime)
 	{
-		QFileInfo javaInfo(realJavaPath);
-		qlonglong javaUnixTime = javaInfo.lastModified().toMSecsSinceEpoch();
-		auto storedUnixTime = m_instance->settings()->get("JavaTimestamp").toLongLong();
-		// if they are not the same, check!
-		if(javaUnixTime != storedUnixTime)
-		{
-			QEventLoop ev;
-			auto checker = std::make_shared<JavaChecker>();
-			bool successful = false;
-			QString errorLog;
-			QString version;
-			emit log(tr("Checking Java version..."), MessageLevel::MultiMC);
-			connect(checker.get(), &JavaChecker::checkFinished,
-					[&](JavaCheckResult result)
-					{
-						successful = result.valid;
-						errorLog = result.errorLog;
-						version = result.javaVersion;
-						ev.exit();
-					});
-			checker->m_path = realJavaPath;
-			checker->performCheck();
-			ev.exec();
-			if(!successful)
-			{
-				// Error message displayed if java can't start
-				emit log(tr("Could not start java:"), MessageLevel::Error);
-				auto lines = errorLog.split('\n');
-				for(auto line: lines)
+		QEventLoop ev;
+		auto checker = std::make_shared<JavaChecker>();
+		bool successful = false;
+		QString errorLog;
+		QString version;
+		emit log(tr("Checking Java version..."), MessageLevel::MultiMC);
+		connect(checker.get(), &JavaChecker::checkFinished,
+				[&](JavaCheckResult result)
 				{
-					emit log(line, MessageLevel::Error);
-				}
-				emit log("\nCheck your MultiMC Java settings.", MessageLevel::MultiMC);
-				m_instance->cleanupAfterRun();
-				emit launch_failed(m_instance);
-				// not running, failed
-				m_instance->setRunning(false);
-				return;
+					successful = result.valid;
+					errorLog = result.errorLog;
+					version = result.javaVersion;
+					ev.exit();
+				});
+		checker->m_path = realJavaPath;
+		checker->performCheck();
+		ev.exec();
+		if(!successful)
+		{
+			// Error message displayed if java can't start
+			emit log(tr("Could not start java:"), MessageLevel::Error);
+			auto lines = errorLog.split('\n');
+			for(auto line: lines)
+			{
+				emit log(line, MessageLevel::Error);
 			}
-			emit log(tr("Java version is %1!\n").arg(version), MessageLevel::MultiMC);
-			m_instance->settings()->set("JavaVersion", version);
-			m_instance->settings()->set("JavaTimestamp", javaUnixTime);
+			emit log("\nCheck your MultiMC Java settings.", MessageLevel::MultiMC);
+			m_instance->cleanupAfterRun();
+			emit launch_failed(m_instance);
+			// not running, failed
+			m_instance->setRunning(false);
+			return false;
 		}
+		emit log(tr("Java version is %1!\n").arg(version), MessageLevel::MultiMC);
+		m_instance->settings()->set("JavaVersion", version);
+		m_instance->settings()->set("JavaTimestamp", javaUnixTime);
+	}
+	return true;
+}
+
+void MinecraftLauncher::arm()
+{
+	printHeader();
+	emit log("Minecraft folder is:\n" + m_process.workingDirectory() + "\n\n");
+
+	/*
+	if (!preLaunch())
+	{
+		emit ended(m_instance, 1, QProcess::CrashExit);
+		return;
+	}
+	*/
+
+	m_instance->setLastLaunch();
+
+	QString JavaPath = m_instance->settings()->get("JavaPath").toString();
+	emit log("Java path is:\n" + JavaPath + "\n\n");
+
+	if(!checkJava(JavaPath))
+	{
+		return;
 	}
 
 	QStringList args = javaArguments();

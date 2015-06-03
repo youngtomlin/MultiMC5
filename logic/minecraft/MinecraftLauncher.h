@@ -69,8 +69,9 @@ protected:
 	QString launchScript;
 	QString m_nativeFolder;
 
+protected:
+	bool checkJava(QString path);
 	virtual QMap<QString, QString> getVariables() const override;
-
 	QStringList javaArguments() const;
 	virtual QString censorPrivateInfo(QString in) override;
 	virtual MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel) override;

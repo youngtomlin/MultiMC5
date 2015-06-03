@@ -130,7 +130,7 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 {
 	if (!m_write_active)
 	{
-		if (mode != MessageLevel::PrePost && mode != MessageLevel::MultiMC)
+		if (mode != MessageLevel::MultiMC)
 		{
 			return;
 		}
@@ -191,11 +191,6 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 		{
 			format.setForeground(QColor("red"));
 			format.setBackground(QColor("black"));
-			break;
-		}
-		case MessageLevel::PrePost:
-		{
-			format.setForeground(QColor("grey"));
 			break;
 		}
 		case MessageLevel::Info:

@@ -18,7 +18,8 @@ public:
 		Running,
 		Finished,
 		Crashed,
-		Aborted
+		Aborted,
+		Skipped
 	};
 
 public:
@@ -27,8 +28,6 @@ public:
 
 	State state() const;
 	int exitCode() const;
-
-	static bool isPeacefulState(State state);
 
 signals:
 	void log(QStringList lines, MessageLevel::Enum level);
